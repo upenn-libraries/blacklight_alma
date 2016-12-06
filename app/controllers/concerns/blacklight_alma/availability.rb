@@ -5,7 +5,6 @@ module BlacklightAlma
 
     include ActiveSupport::Benchmarkable
 
-    @api = EzWadl::Parser.parse(BlacklightAlma::Engine.root.join('wadl', 'api.wadl'))
     @subfield_codes_to_fieldnames = {
       'q' => 'library',
       'c' => 'location',
@@ -14,7 +13,7 @@ module BlacklightAlma
     }
 
     class << self
-      attr_accessor :api, :subfield_codes_to_fieldnames
+      attr_accessor :subfield_codes_to_fieldnames
     end
 
     # returns an Array of bib items and their holdings
@@ -56,7 +55,7 @@ module BlacklightAlma
         Blacklight.logger.debug("ALMA API availability query: #{api_params}")
 
         api_response = benchmark('ALMA API availability request', level: :debug) do
-          Availability.api[0].almaws_v1_bibs.get({ query: api_params })
+          BlacklightAlma::Api.instance.ezwadl_api[0].almaws_v1_bibs.get({ query: api_params })
         end
 
         if api_response
