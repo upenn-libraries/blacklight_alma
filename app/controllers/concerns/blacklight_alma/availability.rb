@@ -82,6 +82,7 @@ module BlacklightAlma
             #       }
             #   }
             # }
+            Blacklight.logger.error("ALMA JSON response contains error code=#{api_response}")
             response_data = {
               'error' => "ALMA error: #{web_service_result['errorList']}"
             }
