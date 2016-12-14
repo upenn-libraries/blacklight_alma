@@ -32,7 +32,7 @@ BlacklightAlma.prototype.formatHolding = function (holding) {
     else if(holding['inventory_type'] == 'electronic') {
         var url = null;
         if(holding['link_to_service_page']) {
-            var text = holding['interface_name'] || "Electronic resource";
+            var text = holding['collection'] || "Electronic resource";
             url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
         }
         return url || "Electronic Resource (no URL available)";
