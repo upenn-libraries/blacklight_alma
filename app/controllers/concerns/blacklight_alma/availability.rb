@@ -5,15 +5,43 @@ module BlacklightAlma
 
     include ActiveSupport::Benchmarkable
 
-    @subfield_codes_to_fieldnames = {
-      'q' => 'library',
-      'c' => 'location',
-      'd' => 'call_number',
-      'e' => 'status',
+    # see https://developers.exlibrisgroup.com/alma/apis/bibs/GET/gwPcGly021om4RTvtjbPleCklCGxeYAf3JPdiJpJhUA=/af2fb69d-64f4-42bc-bb05-d8a0ae56936e
+    @inventory_type_to_subfield_codes_to_fieldnames = {
+        'AVA' => {
+            'INVENTORY_TYPE' => 'physical',
+            'a' => 'institution',
+            'b' => 'library_code',
+            'c' => 'location',
+            'd' => 'call_number',
+            'e' => 'availability',
+            'f' => 'total_items',
+            'g' => 'non_available_items',
+            'j' => 'location_code',
+            'k' => 'call_number_type',
+            'p' => 'priority',
+            'q' => 'library',
+        },
+        'AVD' => {
+            'INVENTORY_TYPE' => 'digital',
+            'a' => 'institution',
+            'b' => 'representations_id',
+            'c' => 'representation',
+            'd' => 'repository_name',
+            'e' => 'label',
+        },
+        'AVE' => {
+            'INVENTORY_TYPE' => 'electronic',
+            'l' => 'library_code',
+            'm' => 'collection',
+            'n' => 'public_note',
+            's' => 'coverage_statement',
+            't' => 'interface_name',
+            'u' => 'link_to_service_page',
+        }
     }
 
     class << self
-      attr_accessor :subfield_codes_to_fieldnames
+      attr_accessor :inventory_type_to_subfield_codes_to_fieldnames
     end
 
     # returns an Array of bib items and their holdings
@@ -24,16 +52,24 @@ module BlacklightAlma
         bibs = [ bibs ]
       end
 
+      inventory_types = Availability.inventory_type_to_subfield_codes_to_fieldnames.keys
+
       bibs.map do |bib|
         record = Hash.new
         record['mms_id'] = bib['mms_id']
-        ava_fields = bib.fetch('record', Hash.new).fetch('datafield', []).select { |df| df['tag'] == 'AVA'} || []
-        record['holdings'] = ava_fields.map do |ava_field|
-          ava_field.fetch('subfield', []).reduce(Hash.new) do |acc, subfield|
-            fieldname = Availability.subfield_codes_to_fieldnames[subfield['code']]
+
+        inventory_fields = bib.fetch('record', Hash.new).fetch('datafield', []).select { |df| inventory_types.member?(df['tag']) } || []
+
+        record['holdings'] = inventory_fields.map do |inventory_field|
+          inventory_type = inventory_field['tag']
+          subfield_codes_to_fieldnames = Availability.inventory_type_to_subfield_codes_to_fieldnames[inventory_type]
+          holding = inventory_field.fetch('subfield', []).reduce(Hash.new) do |acc, subfield|
+            fieldname = subfield_codes_to_fieldnames[subfield['code']]
             acc[fieldname] = subfield['__content__']
             acc
           end
+          holding['inventory_type'] = subfield_codes_to_fieldnames['INVENTORY_TYPE']
+          holding
         end
         record
       end.reduce(Hash.new) do |acc, avail|

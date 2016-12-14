@@ -15,11 +15,28 @@ var BlacklightAlma = function (options) {
  * @returns {string}
  */
 BlacklightAlma.prototype.formatHolding = function (holding) {
-    var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
-    return [holding['status'], libraryAndLocation, holding['call_number']]
-        .filter(function (item) {
-            return item != null && item.length > 0;
-        }).join(". ");
+    if(holding['inventory_type'] == 'physical') {
+        var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
+        return [holding['availability'], libraryAndLocation, holding['call_number']]
+            .filter(function (item) {
+                return item != null && item.length > 0;
+            }).join(". ");
+    }
+    else if(holding['inventory_type'] == 'digital') {
+        var joined = [holding['institution'], holding['repository_name'], holding['label'], holding['representation']]
+            .filter(function (item) {
+                return item != null && item.length > 0;
+            }).join(" - ");
+        return joined || "Digital Resource (no other information available)";
+    }
+    else if(holding['inventory_type'] == 'electronic') {
+        var url = null;
+        if(holding['link_to_service_page']) {
+            var text = holding['interface_name'] || "Electronic resource";
+            url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
+        }
+        return url || "Electronic Resource (no URL available)";
+    }
 };
 
 /**
