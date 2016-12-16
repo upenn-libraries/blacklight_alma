@@ -45,7 +45,7 @@ module BlacklightAlma
       attr_accessor :inventory_type_to_subfield_codes_to_fieldnames
     end
 
-    # returns an Array of bib items and their holdings
+    # @return [Hash] data structure describing holdings of bib ids
     def parse_bibs_data(api_response)
       # make sure bibs is always an Array
       bibs = api_response['bibs']['bib']
