@@ -35,7 +35,11 @@ BlacklightAlma.prototype.formatHolding = function (holding) {
             var text = holding['collection'] || "Electronic resource";
             url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
         }
-        return url || "Electronic Resource (no URL available)";
+        url = url || "Electronic Resource (no URL available)";
+        return [url, holding['public_note']]
+            .filter(function (item) {
+                return item != null && item.length > 0;
+            }).join(" - ");
     }
 };
 
