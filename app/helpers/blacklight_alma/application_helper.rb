@@ -18,15 +18,17 @@ module BlacklightAlma
       mms_id = document.id
       domain = ENV['ALMA_DELIVERY_DOMAIN'] || 'alma.delivery.domain.example.com'
       institution_code = ENV['ALMA_INSTITUTION_CODE'] || 'INSTITUTION_CODE'
+      service_type ||= alma_service_type_for_fulfillment_url(document)
 
       query = {
           rfr_id: 'info:sid/primo.exlibrisgroup.com',
-          svc_dat: service_type || alma_service_type_for_fulfillment_url(document),
+          svc_dat: service_type,
           'rft.mms_id': mms_id,
       }
       rft_dat_value = [language.present? ? "language=#{language}" : nil,
                        view.present? ? "view=#{view}" : nil].compact.join(',')
       query['rft_dat'] = rft_dat_value if rft_dat_value.present?
+      query['u.ignore_date_coverage'] = 'true' if service_type == 'viewit'
 
       URI::HTTPS.build(
         host: domain,
