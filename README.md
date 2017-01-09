@@ -38,6 +38,16 @@ BlacklightAlma object:
 //= require blacklight_alma/blacklight_alma
 ```
 
+Create or edit your project's `/app/helpers/catalog_helper.rb` to get BlacklightAlma 
+overrides:
+
+```ruby
+module CatalogHelper
+  include Blacklight::CatalogHelperBehavior
+  include BlacklightAlma::CatalogOverride
+end
+```
+
 Create a new js file in your project containing these lines so that
 the availability code is triggered on page load.
 
