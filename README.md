@@ -63,8 +63,17 @@ In your view (typically `_index_default.html.erb`), add the HTML
 classes and attributes needed to trigger status loading via AJAX.
 
 ```html
+<dl class="document-metadata dl-horizontal dl-invert">
+  <!-- ... stock blacklight code not shown here... --> 
   <dt class="blacklight-availability">Status/Location:</dt>
   <dd class="blacklight-availability availability-ajax-load" data-availability-id="<%= document.id %>">Loading...</dd>
+  <dt class="availability-show-on-ajax-load hide"></dt>
+  <dd class="availability-show-on-ajax-load hide">
+    <button class="btn btn-default availability-toggle-details" data-show-text="Show Availability Details" data-hide-text="Hide Availability Details">Show Availability Details</button>
+  </dd>
+</dl>
+
+<div class="availability-details-container" data-availability-iframe-url="<%= alma_app_fulfillment_url(document) %>"></div>
 ```
 
 ## Fulfillment iframe
