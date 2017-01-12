@@ -48,10 +48,7 @@ module BlacklightAlma
     # @return [Hash] data structure describing holdings of bib ids
     def parse_bibs_data(api_response)
       # make sure bibs is always an Array
-      bibs = api_response['bibs']['bib']
-      if bibs.is_a?(Hash)
-        bibs = [ bibs ]
-      end
+      bibs = [ api_response['bibs']['bib'] ].flatten(1)
 
       inventory_types = Api.inventory_type_to_subfield_codes_to_fieldnames.keys
 
@@ -66,10 +63,7 @@ module BlacklightAlma
           subfield_codes_to_fieldnames = Api.inventory_type_to_subfield_codes_to_fieldnames[inventory_type]
 
           # make sure subfields is always an Array (which isn't the case if there's only one subfield element)
-          subfields = inventory_field.fetch('subfield', [])
-          if subfields.is_a?(Hash)
-            subfields = [ subfields ]
-          end
+          subfields = [ inventory_field.fetch('subfield', []) ].flatten(1)
 
           holding = subfields.reduce(Hash.new) do |acc, subfield|
             fieldname = subfield_codes_to_fieldnames[subfield['code']]
