@@ -2,6 +2,8 @@
 require 'singleton'
 require 'benchmark'
 
+require 'ezwadl'
+
 module BlacklightAlma
 
   # This is a "low-level" class that mainly uses ezwadl
