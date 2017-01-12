@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
   s.add_dependency "blacklight", "~> 6.0"
   # there is no way to point to a git repo in a gemspec,
   # so the app's Gemfile will need to include ezwadl as well.
-  s.add_dependency 'ezwadl'
+  s.add_dependency 'ezwadl', '0.0.1'
 
   s.add_development_dependency "engine_cart", "1.0.1"
 end
