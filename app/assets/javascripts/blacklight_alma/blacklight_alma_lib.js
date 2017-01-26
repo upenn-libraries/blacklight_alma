@@ -104,7 +104,6 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
                 if(!data.error) {
                     console.log(data);
                     baObj.populateAvailability(data);
-                    baObj.showElementsOnAvailabilityLoad();
                 } else {
                     console.log("Attempt #" + attemptCount + " error loading availability: " + data.error);
                     // errors here aren't necessary "fatal", they could be temporary
@@ -122,6 +121,9 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
                 } else {
                     baObj.errorLoadingAvailability();
                 }
+            },
+            complete: function() {
+                baObj.showElementsOnAvailabilityLoad();
             }
         });
     }
