@@ -30,6 +30,13 @@ module BlacklightAlma
       query['rft_dat'] = rft_dat_value if rft_dat_value.present?
       query['u.ignore_date_coverage'] = 'true' if service_type == 'viewit'
 
+      if session[:alma_auth_type] == 'sso'
+        # TODO: handle single sign on
+      elsif session[:alma_social_login_provider].present?
+        query['oauth'] = 'true'
+        query['provider'] = session[:alma_social_login_provider]
+      end
+
       URI::HTTPS.build(
         host: domain,
         path: "/view/uresolver/#{institution_code}/openurl",
@@ -50,6 +57,22 @@ module BlacklightAlma
       else
         'getit'
       end
+    end
+
+    def alma_social_login_url(backUrl=nil)
+      if backUrl.nil?
+        backUrl = alma_social_login_callback_url
+      end
+      domain = ENV['ALMA_DELIVERY_DOMAIN'] || 'alma.delivery.domain.example.com'
+      institution_code = ENV['ALMA_INSTITUTION_CODE'] || 'INSTITUTION_CODE'
+      query = {
+          institutionCode: institution_code,
+          backUrl: backUrl
+      }
+      URI::HTTPS.build(
+          host: domain,
+          path: '/view/socialLogin',
+          query: query.to_query).to_s
     end
 
   end

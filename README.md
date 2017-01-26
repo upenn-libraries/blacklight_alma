@@ -22,6 +22,7 @@ environment variables:
 ALMA_DELIVERY_DOMAIN = hostname of alma instance
 ALMA_INSTITUTION_CODE = institution code
 ALMA_API_KEY = api key
+ALMA_AUTH_SECRET = used for social auth, copy the value from Alma configuration
 ```
 
 # Features
@@ -92,4 +93,38 @@ Add something like this to your show view (`_show_default.html.erb`, usually):
 
 ```html
   <iframe src="<%= alma_app_fulfillment_url(document) %>" style="width: 100%"></iframe>
+```
+
+## Social Login
+
+See this [blog post](https://developers.exlibrisgroup.com/blog/Leveraging-Social-Login-with-Alma) for information
+about how to implement Alma's social login feature.
+
+This gem can integrate social login with Devise.
+
+In your project, create a subclass of `Devise::SessionsController` if you don't already have one. If you do,
+then just include the `BlacklightAlma::SocialLogin` module. See that module for things you can override.
+
+```ruby
+class SessionsController < Devise::SessionsController
+  include BlacklightAlma::SocialLogin
+end
+```
+
+Modify your `routes.rb` file as follows:
+
+```ruby
+# tell devise to use your SessionsController
+devise_for :users, controllers: { sessions: 'sessions' }
+
+# set up the route for the social login callback
+devise_scope :user do
+  get 'alma/social_login_callback' => 'sessions#social_login_callback'
+end
+```
+
+Create your HTML link to login using the social login.
+
+```html
+<a href="<%= alma_social_login_url %>">Login using a Google account</a>
 ```
