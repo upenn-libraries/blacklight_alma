@@ -23,6 +23,8 @@ module BlacklightAlma
         social_login_fill_new_user(user, jwt)
       end
       sign_in(:user, user)
+      # set warden user manually
+      env['warden'].set_user(user)
 
       session[:alma_auth_type] = 'social_login'
       session[:alma_social_login_provider] = jwt['provider']
