@@ -3,7 +3,7 @@ module BlacklightAlma
     isolate_namespace BlacklightAlma
 
     initializer 'blacklight_alma.helpers' do |app|
-      ActionView::Base.send :include, BlacklightAlma::ApplicationHelper
+      ActionView::Base.send :include, BlacklightAlmaHelper
     end
 
   end

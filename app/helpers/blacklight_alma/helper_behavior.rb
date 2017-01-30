@@ -1,7 +1,7 @@
 require 'uri'
 
 module BlacklightAlma
-  module ApplicationHelper
+  module HelperBehavior
 
     # Returns a URL to be used in an iframe
     # See https://developers.exlibrisgroup.com/alma/integrations/discovery/fulfillment_services
