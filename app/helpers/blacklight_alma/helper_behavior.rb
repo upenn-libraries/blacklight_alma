@@ -3,6 +3,29 @@ require 'uri'
 module BlacklightAlma
   module HelperBehavior
 
+    def alma_domain
+      ENV['ALMA_DELIVERY_DOMAIN'] || 'alma.delivery.domain.example.com'
+    end
+
+    def alma_institution_code
+      ENV['ALMA_INSTITUTION_CODE'] || 'INSTITUTION_CODE'
+    end
+
+    # Lower-level function to build an openurl URL. used by other helpers,
+    # you shouldn't need to call this directly from application code.
+    #
+    # @param query [Hash] this gets merged into a hash of defaults
+    def alma_build_openurl(query)
+      query_defaults = {
+        rfr_id: 'info:sid/primo.exlibrisgroup.com',
+      }
+
+      URI::HTTPS.build(
+          host: alma_domain,
+          path: "/view/uresolver/#{alma_institution_code}/openurl",
+          query: query_defaults.merge(query).to_query).to_s
+    end
+
     # Returns a URL to be used in an iframe
     # See https://developers.exlibrisgroup.com/alma/integrations/discovery/fulfillment_services
     #
@@ -16,12 +39,9 @@ module BlacklightAlma
     # @return [String] url
     def alma_app_fulfillment_url(document, service_type: nil, language: nil, view: nil)
       mms_id = document.id
-      domain = ENV['ALMA_DELIVERY_DOMAIN'] || 'alma.delivery.domain.example.com'
-      institution_code = ENV['ALMA_INSTITUTION_CODE'] || 'INSTITUTION_CODE'
       service_type ||= alma_service_type_for_fulfillment_url(document)
 
       query = {
-          rfr_id: 'info:sid/primo.exlibrisgroup.com',
           svc_dat: service_type,
           'rft.mms_id': mms_id,
       }
@@ -37,10 +57,7 @@ module BlacklightAlma
         query['provider'] = session[:alma_social_login_provider]
       end
 
-      URI::HTTPS.build(
-        host: domain,
-        path: "/view/uresolver/#{institution_code}/openurl",
-        query: query.to_query).to_s
+      alma_build_openurl(query)
     end
 
     # Returns the right service type string depending on whether
@@ -59,18 +76,25 @@ module BlacklightAlma
       end
     end
 
+    def alma_electronic_resource_direct_link(portfolio_pid)
+      query = {
+          'u.ignore_date_coverage': 'true',
+          'Force_direct': true,
+          portfolio_pid: portfolio_pid
+      }
+      alma_build_openurl(query)
+    end
+
     def alma_social_login_url(backUrl=nil)
       if backUrl.nil?
         backUrl = alma_social_login_callback_url
       end
-      domain = ENV['ALMA_DELIVERY_DOMAIN'] || 'alma.delivery.domain.example.com'
-      institution_code = ENV['ALMA_INSTITUTION_CODE'] || 'INSTITUTION_CODE'
       query = {
-          institutionCode: institution_code,
+          institutionCode: alma_institution_code,
           backUrl: backUrl
       }
       URI::HTTPS.build(
-          host: domain,
+          host: alma_domain,
           path: '/view/socialLogin',
           query: query.to_query).to_s
     end
