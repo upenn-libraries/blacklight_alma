@@ -87,7 +87,13 @@ module BlacklightAlma
 
     def alma_social_login_url(backUrl=nil)
       if backUrl.nil?
-        backUrl = alma_social_login_callback_url
+        # alma_social_login_callback_url should be either manually
+        # defined in a helper or auto-defined by a route
+        if respond_to? :alma_social_login_callback_url
+          backUrl = alma_social_login_callback_url
+        else
+          raise "alma_social_login_callback_url helper method not found"
+        end
       end
       query = {
           institutionCode: alma_institution_code,

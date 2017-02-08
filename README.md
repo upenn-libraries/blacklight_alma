@@ -117,7 +117,8 @@ Modify your `routes.rb` file as follows:
 # tell devise to use your SessionsController
 devise_for :users, controllers: { sessions: 'sessions' }
 
-# set up the route for the social login callback
+# set up the route for the callback, which is needed for the
+# alma_social_login_url helper to work
 devise_scope :user do
   get 'alma/social_login_callback' => 'sessions#social_login_callback'
 end
