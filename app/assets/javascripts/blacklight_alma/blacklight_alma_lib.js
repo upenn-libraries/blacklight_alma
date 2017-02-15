@@ -154,6 +154,7 @@ BlacklightAlma.prototype.toggleAvailabilityDetailsForRecord = function(toggleEle
     if ($(containerElement).find("iframe").length == 0) {
         var url = $(containerElement).data("availabilityIframeUrl");
         var iframe = $("<iframe>");
+        iframe.attr("class", "availability-details-iframe");
         iframe.attr("src", url);
         iframe.attr("style", "width: 100%");
         $(containerElement).html(iframe);
