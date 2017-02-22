@@ -39,6 +39,20 @@ BlacklightAlma object:
 //= require blacklight_alma/blacklight_alma
 ```
 
+Add a `#alma_mms_id` method to your `SolrDocument` class if the
+document's id field is different from the Alma MMS ID.
+
+```
+class SolrDocument
+  # ...
+  
+  # used by blacklight_alma
+  def alma_mms_id
+    fetch('alma_mms_id', nil)
+  end
+end
+```
+
 Create or edit your project's `/app/helpers/catalog_helper.rb` to get BlacklightAlma 
 overrides:
 
@@ -77,7 +91,7 @@ classes and attributes needed to trigger status loading via AJAX.
 <dl class="document-metadata dl-horizontal dl-invert">
   <!-- ... stock blacklight code not shown here... --> 
   <dt class="blacklight-availability">Status/Location:</dt>
-  <dd class="blacklight-availability availability-ajax-load" data-availability-id="<%= document.id %>">Loading...</dd>
+  <dd class="blacklight-availability availability-ajax-load" data-availability-id="<%= document.alma_mms_id %>">Loading...</dd>
   <dt class="availability-show-on-ajax-load hide"></dt>
   <dd class="availability-show-on-ajax-load hide">
     <button class="btn btn-default availability-toggle-details" data-show-text="Show Availability Details" data-hide-text="Hide Availability Details">Show Availability Details</button>
@@ -88,6 +102,9 @@ classes and attributes needed to trigger status loading via AJAX.
 ```
 
 ## Fulfillment iframe
+
+Add a `#alma_mms_id` method to your `SolrDocument` class if the
+document's id field is different from the Alma MMS ID. See above.
 
 Add something like this to your show view (`_show_default.html.erb`, usually):
 

@@ -38,7 +38,7 @@ module BlacklightAlma
     # Gerenal configuration - Delivery System Skins."
     # @return [String] url
     def alma_app_fulfillment_url(document, service_type: nil, language: nil, view: nil)
-      mms_id = document.id
+      mms_id = document.respond_to?(:alma_mms_id) ? document.alma_mms_id : document.id
       service_type ||= alma_service_type_for_fulfillment_url(document)
 
       query = {
