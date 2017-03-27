@@ -10,7 +10,8 @@ var BlacklightAlma = function (options) {
 };
 
 /**
- * Subclasses should override to customize.
+ * Subclasses should override to customize. To filter out a holding from display,
+ * this function can return null.
  * @param holding
  * @returns {string}
  */
@@ -63,9 +64,9 @@ BlacklightAlma.prototype.populateAvailability = function (data) {
         var id = $(element).data("availabilityId");
         if (availability[id]) {
             var holdings = availability[id]['holdings'] || [];
-            var holdingsList = baObj.formatHoldings($.map(holdings, baObj.formatHolding));
-            if (holdingsList.length > 0) {
-                $(element).html(holdingsList);
+            if (holdings.length > 0) {
+                var formatted = $.map(holdings, baObj.formatHolding);
+                $(element).html(baObj.formatHoldings(formatted));
                 return;
             }
         }
