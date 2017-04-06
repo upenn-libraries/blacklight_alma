@@ -112,19 +112,22 @@ Add something like this to your show view (`_show_default.html.erb`, usually):
   <iframe src="<%= alma_app_fulfillment_url(document) %>" style="width: 100%"></iframe>
 ```
 
-## Social Login
+## SSO and Social Login
 
-See this [blog post](https://developers.exlibrisgroup.com/blog/Leveraging-Social-Login-with-Alma) for information
-about how to implement Alma's social login feature.
+See this [page](https://developers.exlibrisgroup.com/alma/integrations/discovery/fulfillment_services)
+and this [blog post](https://developers.exlibrisgroup.com/blog/Leveraging-Social-Login-with-Alma) 
+for information about how to implement SSO and Alma's social login feature.
 
-This gem can integrate social login with Devise.
+This gem can integrates these services with Devise.
 
 In your project, create a subclass of `Devise::SessionsController` if you don't already have one. If you do,
-then just include the `BlacklightAlma::SocialLogin` module. See that module for things you can override.
+then just include the `BlacklightAlma::SocialLogin` and/or `BlacklightAlma::Sso` modules, as appropriate.
+See the code for things you can override.
 
 ```ruby
 class SessionsController < Devise::SessionsController
   include BlacklightAlma::SocialLogin
+  include BlacklightAlma::Sso
 end
 ```
 
@@ -134,14 +137,15 @@ Modify your `routes.rb` file as follows:
 # tell devise to use your SessionsController
 devise_for :users, controllers: { sessions: 'sessions' }
 
-# set up the route for the callback, which is needed for the
+# set up routes for the callbacks, which are needed for the
 # alma_social_login_url helper to work
 devise_scope :user do
   get 'alma/social_login_callback' => 'sessions#social_login_callback'
+  get 'alma/sso_login_callback' => 'sessions#sso_login_callback'
 end
 ```
 
-Create your HTML link to login using the social login.
+Create your HTML links to login using SSo or social login.
 
 ```html
 <a href="<%= alma_social_login_url %>">Login using a Google account</a>
