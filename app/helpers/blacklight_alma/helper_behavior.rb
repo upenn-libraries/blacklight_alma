@@ -50,8 +50,9 @@ module BlacklightAlma
       query['rft_dat'] = rft_dat_value if rft_dat_value.present?
       query['u.ignore_date_coverage'] = 'true' if service_type == 'viewit'
 
-      if session[:alma_auth_type] == 'sso'
-        # TODO: handle single sign on
+      if session[:alma_auth_type] == 'sso' && session[:alma_sso_token].present?
+        query['sso'] = 'true'
+        query['token'] = session[:alma_sso_token]
       elsif session[:alma_social_login_provider].present?
         query['oauth'] = 'true'
         query['provider'] = session[:alma_social_login_provider]
