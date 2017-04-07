@@ -37,7 +37,7 @@ BlacklightAlma.prototype.formatHolding = function (holding) {
             url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
         }
         url = url || "Electronic Resource (no URL available)";
-        return [url, holding['public_note']]
+        return [url, holding['coverage_statement']]
             .filter(function (item) {
                 return item != null && item.length > 0;
             }).join(" - ");
