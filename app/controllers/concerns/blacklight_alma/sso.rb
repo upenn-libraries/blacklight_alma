@@ -29,10 +29,14 @@ module BlacklightAlma
       # set warden user manually
       env['warden'].set_user(user)
 
-      session[:alma_auth_type] = 'sso'
-      session[:alma_sso_token] = SecureRandom.hex(10)
+      sso_login_populate_session
 
       redirect_to next_url
+    end
+
+    def sso_login_populate_session
+      session[:alma_auth_type] = 'sso'
+      session[:alma_sso_token] = SecureRandom.hex(10)
     end
 
     # @return [Class] class object to use for users

@@ -26,10 +26,15 @@ module BlacklightAlma
       # set warden user manually
       env['warden'].set_user(user)
 
-      session[:alma_auth_type] = 'social_login'
-      session[:alma_social_login_provider] = jwt['provider']
+      social_login_populate_session(jwt)
 
       redirect_to social_login_callback_redirect
+    end
+
+    # populate the session
+    def social_login_populate_session(jwt)
+      session[:alma_auth_type] = 'social_login'
+      session[:alma_social_login_provider] = jwt['provider']
     end
 
     # This gets called on newly created User objects
