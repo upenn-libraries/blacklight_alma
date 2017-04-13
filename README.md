@@ -40,7 +40,8 @@ BlacklightAlma object:
 ```
 
 Add a `#alma_mms_id` method to your `SolrDocument` class if the
-document's id field is different from the Alma MMS ID.
+document's id field is different from the Alma MMS ID. Add a
+`#alma_availability_mms_ids` method for the availability API.
 
 ```
 class SolrDocument
@@ -50,6 +51,15 @@ class SolrDocument
   def alma_mms_id
     fetch('alma_mms_id', nil)
   end
+
+  # returns an array of IDs to query through API to get holdings 
+  # for this document. This is usually just the alma MMS ID for
+  # this bib record, but in the case of boundwith records, we return 
+  # the boundwith IDs, because that's where Alma stores the holdings.
+  def alma_availability_mms_ids
+    fetch('bound_with_ids', [alma_mms_id]])
+  end
+
 end
 ```
 
@@ -91,7 +101,7 @@ classes and attributes needed to trigger status loading via AJAX.
 <dl class="document-metadata dl-horizontal dl-invert">
   <!-- ... stock blacklight code not shown here... --> 
   <dt class="blacklight-availability">Status/Location:</dt>
-  <dd class="blacklight-availability availability-ajax-load" data-availability-id="<%= document.alma_mms_id %>">Loading...</dd>
+  <dd class="blacklight-availability availability-ajax-load" data-availability-ids="<%= document.alma_availability_mms_ids.join(',') %>">Loading...</dd>
   <dt class="availability-show-on-ajax-load hide"></dt>
   <dd class="availability-show-on-ajax-load hide">
     <button class="btn btn-default availability-toggle-details" data-show-text="Show Availability Details" data-hide-text="Hide Availability Details">Show Availability Details</button>

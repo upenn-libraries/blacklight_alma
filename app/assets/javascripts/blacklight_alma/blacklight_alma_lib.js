@@ -61,16 +61,27 @@ BlacklightAlma.prototype.populateAvailability = function (data) {
     var baObj = this;
     var availability = data['availability'];
     $(".availability-ajax-load").each(function (index, element) {
-        var id = $(element).data("availabilityId");
-        if (availability[id]) {
-            var holdings = availability[id]['holdings'] || [];
-            if (holdings.length > 0) {
-                var formatted = $.map(holdings, baObj.formatHolding);
-                $(element).html(baObj.formatHoldings(formatted));
-                return;
+        var idString = $(element).data("availabilityIds").toString() || "";
+        var ids = idString.split(",").filter(function(s) { return s.length > 0; });
+        var found = false;
+
+        // jquery's map auto-flattens and strips out nulls
+        var html = $.map(ids, function(id) {
+            if (availability[id]) {
+                found = true;
+                var holdings = availability[id]['holdings'] || [];
+                if (holdings.length > 0) {
+                    var formatted = $.map(holdings, baObj.formatHolding);
+                    return baObj.formatHoldings(formatted);
+                }
             }
+        }).join("<br/>");
+
+        if(!found && html.length == 0) {
+            html = "<span style='color: red'>No status available for this item</span>";
         }
-        $(element).html("<span style='color: red'>No status available for this item</span>");
+
+        $(element).html(html);
     });
 };
 
@@ -177,7 +188,7 @@ BlacklightAlma.prototype.loadAvailability = function() {
     this.registerToggleAvailabilityDetails();
 
     var idList = $(".availability-ajax-load").map(function (index, element) {
-        return $(element).data("availabilityId");
+        return $(element).data("availabilityIds");
     }).get().join(",");
 
     this.loadAvailabilityAjax(idList, 1);
