@@ -6,11 +6,15 @@ module BlacklightAlma
 
     extend ActiveSupport::Concern
 
+    def alma_api_class
+      BlacklightAlma::Api
+    end
+
     # controller action AJAX endpoint for fetching availability information
     # for one or more ids
     def availability
       if params[:id_list].present?
-        api = BlacklightAlma::Api.new()
+        api = alma_api_class.new()
         response_data = api.get_availability(params[:id_list].split(','))
       else
         response_data = {

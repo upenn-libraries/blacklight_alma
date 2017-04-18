@@ -21,6 +21,8 @@ module BlacklightAlma
             'k' => 'call_number_type',
             'p' => 'priority',
             'q' => 'library',
+            't' => 'holding_info',
+            '8' => 'holding_id',
         },
         'AVD' => {
             'INVENTORY_TYPE' => 'digital',
@@ -67,10 +69,14 @@ module BlacklightAlma
 
           holding = subfields.reduce(Hash.new) do |acc, subfield|
             fieldname = subfield_codes_to_fieldnames[subfield['code']]
-            acc[fieldname] = subfield['__content__']
+            fieldvalue = subfield['__content__']
+            if fieldname
+              acc[fieldname] = fieldvalue
+            end
             acc
           end
           holding['inventory_type'] = subfield_codes_to_fieldnames['INVENTORY_TYPE']
+          holding = transform_holding(holding)
           holding
         end
         record
@@ -78,6 +84,15 @@ module BlacklightAlma
         acc[avail['mms_id']] = avail.select { |k,v| k != 'mms_id' }
         acc
       end
+    end
+
+    # this hook allows for transformation of the holding record after
+    # it's been populated using the Alma API response data
+    # and the codes have been mapped to human readable names.
+    # @param holding [Hash]
+    # @return [Hash] the modified or new holding
+    def transform_holding(holding)
+      holding
     end
 
     # @param id_list [Array] array of id strings
