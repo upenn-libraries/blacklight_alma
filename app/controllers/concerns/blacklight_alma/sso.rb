@@ -36,6 +36,7 @@ module BlacklightAlma
 
     def sso_login_populate_session
       session[:alma_auth_type] = 'sso'
+      session[:alma_sso_user] = sso_get_user
       session[:alma_sso_token] = SecureRandom.hex(10)
     end
 
