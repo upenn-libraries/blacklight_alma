@@ -7,7 +7,7 @@ module BlacklightAlma
     extend ActiveSupport::Concern
 
     def alma_api_class
-      BlacklightAlma::Api
+      BlacklightAlma::AvailabilityApi
     end
 
     # controller action AJAX endpoint for fetching availability information

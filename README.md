@@ -83,8 +83,8 @@ $(document).ready(function() {
 });
 ```
 
-Use the Availability concern in an existing controller, create a new
-controller using it, or use the stock
+Use the `BlacklightAlma::Availability` concern in an existing
+controller, create a new controller using it, or use the stock
 `BlacklightAlma::AlmaController`. If you choose the last option,
 remember to add it to your `routes.rb` file, like so:
 
