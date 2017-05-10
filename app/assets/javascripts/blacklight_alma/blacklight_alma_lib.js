@@ -57,19 +57,27 @@ BlacklightAlma.prototype.formatHoldings = function (holdings) {
  * Populates html document with availability status strings
  * @param data
  */
-BlacklightAlma.prototype.populateAvailability = function (data) {
+BlacklightAlma.prototype.populateAvailability = function () {
     var baObj = this;
-    var availability = data['availability'];
-    $(".availability-ajax-load").each(function (index, element) {
+
+    var idsLoaded = Object.keys(baObj.availability);
+
+    $(".availability-ajax-load").filter(function(index, element) {
+        return ! $(element).hasClass("availability-ajax-loaded");
+    }).each(function (index, element) {
         var idString = $(element).data("availabilityIds").toString() || "";
         var ids = idString.split(",").filter(function(s) { return s.length > 0; });
-        var found = false;
+
+        // make sure we have data for ALL the ids (this accounts for bibs w/ multiple holdings
+        // across boundwiths), otherwise we're not ready to populate yet.
+        if(ids.filter(function(id) { return idsLoaded.includes(id); }).length != ids.length) {
+            return;
+        }
 
         // jquery's map auto-flattens and strips out nulls
         var html = $.map(ids, function(id) {
-            if (availability[id]) {
-                found = true;
-                var holdings = availability[id]['holdings'] || [];
+            if (baObj.availability[id]) {
+                var holdings = baObj.availability[id]['holdings'] || [];
                 if (holdings.length > 0) {
                     var formatted = $.map(holdings, baObj.formatHolding);
                     return baObj.formatHoldings(formatted);
@@ -77,10 +85,7 @@ BlacklightAlma.prototype.populateAvailability = function (data) {
             }
         }).join("<br/>");
 
-        if(!found && html.length == 0) {
-            html = "<span style='color: red'>No status available for this item</span>";
-        }
-
+        $(element).addClass("availability-ajax-loaded");
         $(element).html(html);
     });
 };
@@ -111,11 +116,11 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
         var url = "/alma/availability.json?id_list=" + encodeURIComponent(idList);
         console.log(url);
         $.ajax(url, {
-            timeout: 5000,
             success: function(data, textStatus, jqXHR) {
                 if(!data.error) {
                     console.log(data);
-                    baObj.populateAvailability(data);
+                    baObj.availability = Object.assign(baObj.availability, data['availability']);
+                    baObj.populateAvailability();
                 } else {
                     console.log("Attempt #" + attemptCount + " error loading availability: " + data.error);
                     // errors here aren't necessary "fatal", they could be temporary
@@ -128,14 +133,18 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.log("Attempt #" + attemptCount + " error loading availability: " + textStatus + ", " + errorThrown);
-                if(attemptCount < baObj.MAX_AJAX_ATTEMPTS) {
-                    baObj.loadAvailabilityAjax(idList, attemptCount + 1);
-                } else {
-                    baObj.errorLoadingAvailability();
+                if(errorThrown !== 'timeout') {
+                    if(attemptCount < baObj.MAX_AJAX_ATTEMPTS) {
+                        baObj.loadAvailabilityAjax(idList, attemptCount + 1);
+                    } else {
+                        baObj.errorLoadingAvailability();
+                    }
                 }
             },
             complete: function() {
                 baObj.showElementsOnAvailabilityLoad();
+
+                baObj.availabilityRequestsFinished[idList] = true;
             }
         });
     }
@@ -179,17 +188,67 @@ BlacklightAlma.prototype.toggleAvailabilityDetailsForRecord = function(toggleEle
 };
 
 /**
+ * Partitions an array into arrays of specified size
+ * @param size
+ * @param arr
+ * @returns {*}
+ */
+BlacklightAlma.prototype.partitionArray = function(size, arr) {
+    return arr.reduce(function(acc, a, b) {
+        if(b % size == 0  && b !== 0) {
+            acc.push([]);
+        }
+        acc[acc.length - 1].push(a);
+        return acc;
+    }, [[]]);
+};
+
+/**
  * Looks for elements with class availability-ajax-load,
  * batches up the values in their data-availability-id attribute,
  * makes the AJAX request, and replaces the contents
  * of the element with availability information.
  */
 BlacklightAlma.prototype.loadAvailability = function() {
+    var baObj = this;
+
+    baObj.availability = {};
+    baObj.availabilityRequestsFinished = {};
+
     this.registerToggleAvailabilityDetails();
 
-    var idList = $(".availability-ajax-load").map(function (index, element) {
+    var allIds = $(".availability-ajax-load").map(function (index, element) {
         return $(element).data("availabilityIds");
-    }).get().join(",");
+    }).get();
 
-    this.loadAvailabilityAjax(idList, 1);
+    var idArrays = this.partitionArray(10, allIds);
+
+    idArrays.forEach(function(idArray) {
+        var idArrayStr = idArray.join(",");
+        baObj.availabilityRequestsFinished[idArrayStr] = false;
+        baObj.loadAvailabilityAjax(idArrayStr, 1);
+    });
+
+    baObj.checkAndPopulateMissing();
+};
+
+/**
+ * Periodically checks for all AJAX availability requests to finish, then displays
+ * messages for records that we couldn't load availability info for.
+ */
+BlacklightAlma.prototype.checkAndPopulateMissing = function() {
+
+    var baObj = this;
+    for(key in baObj.availabilityRequestsFinished) {
+        if(!baObj.availabilityRequestsFinished[key]) {
+            setTimeout(function() { baObj.checkAndPopulateMissing(); }, 1000);
+            return;
+        }
+    }
+
+    $(".availability-ajax-load").filter(function(index, element) {
+        return ! $(element).hasClass("availability-ajax-loaded");
+    }).each(function (index, element) {
+        $(element).html("<span style='color: red'>No status available for this item</span>");
+    });
 };
