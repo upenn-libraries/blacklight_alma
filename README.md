@@ -1,7 +1,13 @@
 
 # Blacklight_Alma
 
-[Blacklight](https://github.com/projectblacklight/blacklight) integration with [Alma](https://developers.exlibrisgroup.com/alma).
+[Blacklight](https://github.com/projectblacklight/blacklight)
+integration with [Alma](https://developers.exlibrisgroup.com/alma),
+the library resource management system from Ex Libris.
+
+Features: loading real-time availability information via AJAX using
+the Alma API; fulfillment iframe rendering; single sign-on (SSO) and
+social auth integration with Devise.
 
 This gem is designed to be minimally invasive, making available code
 that your project must choose to use.
@@ -12,7 +18,6 @@ Include this in your app's Gemfile.
 
 ```ruby
 gem 'blacklight_alma', :git => 'https://github.com/upenn-libraries/blacklight_alma.git'
-gem 'ezwadl', :git => 'https://github.com/upenn-libraries/ezwadl.git'
 ```
 
 For the features below to work, you'll need to set the following
@@ -128,7 +133,7 @@ See this [page](https://developers.exlibrisgroup.com/alma/integrations/discovery
 and this [blog post](https://developers.exlibrisgroup.com/blog/Leveraging-Social-Login-with-Alma) 
 for information about how to implement SSO and Alma's social login feature.
 
-This gem can integrates these services with Devise.
+This gem can integrate these services with Devise.
 
 In your project, create a subclass of `Devise::SessionsController` if you don't already have one. If you do,
 then just include the `BlacklightAlma::SocialLogin` and/or `BlacklightAlma::Sso` modules, as appropriate.
