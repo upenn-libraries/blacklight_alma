@@ -34,12 +34,15 @@ module BlacklightAlma
         },
         'AVE' => {
             'INVENTORY_TYPE' => 'electronic',
+            'c' => 'collection_id',
+            'e' => 'activation_status',
             'l' => 'library_code',
             'm' => 'collection',
             'n' => 'public_note',
             's' => 'coverage_statement',
             't' => 'interface_name',
             'u' => 'link_to_service_page',
+            '8' => 'portfolio_pid',
         }
     }
 
