@@ -85,9 +85,18 @@ BlacklightAlma.prototype.populateAvailability = function () {
             }
         }).join("<br/>");
 
-        $(element).addClass("availability-ajax-loaded");
-        $(element).html(html);
+        baObj.renderAvailability(element, html);
     });
+};
+
+/**
+ * Renders the passed-in html on the given element
+ * @param element
+ * @param html
+ */
+BlacklightAlma.prototype.renderAvailability = function(element, html) {
+    $(element).addClass("availability-ajax-loaded");
+    $(element).html(html);
 };
 
 /**
