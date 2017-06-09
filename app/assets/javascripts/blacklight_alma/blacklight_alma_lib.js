@@ -176,17 +176,25 @@ BlacklightAlma.prototype.registerToggleAvailabilityDetails = function() {
     });
 };
 
+
+BlacklightAlma.prototype.createIframeElement = function(url) {
+    var iframe = $("<iframe>");
+    iframe.attr("class", "availability-details-iframe");
+    iframe.attr("title", "Show availability for this record");
+    iframe.attr("src", url);
+    iframe.attr("style", "width: 100%");
+    return iframe;
+};
+
 /**
  * Toggles an individual record's availability details (shown in an iframe)
  */
 BlacklightAlma.prototype.toggleAvailabilityDetailsForRecord = function(toggleElement, containerElement) {
+    var baObj = this;
     var newTextForToggle;
     if ($(containerElement).find("iframe").length == 0) {
         var url = $(containerElement).data("availabilityIframeUrl");
-        var iframe = $("<iframe>");
-        iframe.attr("class", "availability-details-iframe");
-        iframe.attr("src", url);
-        iframe.attr("style", "width: 100%");
+        var iframe = baObj.createIframeElement(url);
         $(containerElement).html(iframe);
         newTextForToggle = $(toggleElement).data("hideText");
     } else {
