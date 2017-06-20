@@ -15,7 +15,7 @@ var BlacklightAlma = function (options) {
  * @param holding
  * @returns {string}
  */
-BlacklightAlma.prototype.formatHolding = function (holding) {
+BlacklightAlma.prototype.formatHolding = function (mms_id, holding) {
     if(holding['inventory_type'] == 'physical') {
         var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
         return [holding['availability'], libraryAndLocation, holding['call_number']]
@@ -79,7 +79,9 @@ BlacklightAlma.prototype.populateAvailability = function () {
             if (baObj.availability[id]) {
                 var holdings = baObj.availability[id]['holdings'] || [];
                 if (holdings.length > 0) {
-                    var formatted = $.map(holdings, baObj.formatHolding);
+                    var formatted = $.map(holdings, function(holding) {
+                        return baObj.formatHolding(id, holding);
+                    });
                     return baObj.formatHoldings(formatted);
                 }
             }
