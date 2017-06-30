@@ -105,7 +105,7 @@ BlacklightAlma.prototype.renderAvailability = function(element, html) {
  * Subclasses should override to customize.
  */
 BlacklightAlma.prototype.errorLoadingAvailability = function () {
-    $(".availability-ajax-load").html("<span style='color: red'>Error loading status for this item</span>");
+    $(".availability-ajax-load").html("<span class='availability-loading-error'>Error loading status for this item</span>");
 };
 
 /**
