@@ -7,6 +7,7 @@
 var BlacklightAlma = function (options) {
     options = options || {};
     this.MAX_AJAX_ATTEMPTS = options.maxAjaxAttempts || 3;
+    this.BATCH_SIZE = options.batchSize || 10;
 };
 
 /**
@@ -104,8 +105,16 @@ BlacklightAlma.prototype.renderAvailability = function(element, html) {
 /**
  * Subclasses should override to customize.
  */
-BlacklightAlma.prototype.errorLoadingAvailability = function () {
-    $(".availability-ajax-load").html("<span class='availability-loading-error'>Error loading status for this item</span>");
+BlacklightAlma.prototype.errorLoadingAvailability = function (idList) {
+    var idListArray = idList.split(",");
+    $(".availability-ajax-load").filter(function(idx, element) {
+        var ids_on_element = $(element).data("availabilityIds").toString().split(",");
+        var found = $.grep(idListArray, function(id) {
+            return ids_on_element.indexOf(id) != -1;
+        }).length > 0;
+        return found;
+    }).addClass("availability-ajax-loaded").html(
+        "<span class='availability-loading-error'>Error loading status for this item</span>");
 };
 
 /**
@@ -118,7 +127,7 @@ BlacklightAlma.prototype.showElementsOnAvailabilityLoad = function () {
 
 /**
  * Actually makes the AJAX call for availability
- * @param idList
+ * @param idList String of comma-sep ids
  * @param attemptCount
  */
 BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) {
@@ -133,12 +142,32 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
                     baObj.availability = Object.assign(baObj.availability, data['availability']);
                     baObj.populateAvailability();
                 } else {
-                    console.log("Attempt #" + attemptCount + " error loading availability: " + data.error);
-                    // errors here aren't necessary "fatal", they could be temporary
+                    console.log("Attempt #" + attemptCount + " error loading availability for " + idList);
+                    console.log(data.error);
+
                     if(attemptCount < baObj.MAX_AJAX_ATTEMPTS) {
-                        baObj.loadAvailabilityAjax(idList, attemptCount + 1);
+
+                        if(data.error !== null && typeof data.error === 'object') {
+                            if(data.error['error'] && data.error['error']['errorMessage']) {
+                                var msg = data.error['error']['errorMessage'];
+                                var isSingleId = idList.indexOf(",") === -1;
+                                // this happens when an MMS ID has been deleted in Alma but Discovery hasn't caught up yet
+                                if(msg.indexOf("Input parameters") !== -1 && msg.indexOf("is not valid.") !== -1 && !isSingleId) {
+                                    console.log("Invalid MMS ID error from API, retrying batch as individual requests");
+                                    idList.split(",").forEach(function(id) {
+                                        baObj.availabilityRequestsFinished[id] = false;
+                                        baObj.loadAvailabilityAjax(id, baObj.MAX_AJAX_ATTEMPTS);
+                                    });
+                                } else {
+                                    baObj.errorLoadingAvailability(idList);
+                                }
+                            }
+                        } else {
+                            baObj.loadAvailabilityAjax(idList, attemptCount + 1);
+                        }
+
                     } else {
-                        baObj.errorLoadingAvailability();
+                        baObj.errorLoadingAvailability(idList);
                     }
                 }
             },
@@ -148,7 +177,7 @@ BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) 
                     if(attemptCount < baObj.MAX_AJAX_ATTEMPTS) {
                         baObj.loadAvailabilityAjax(idList, attemptCount + 1);
                     } else {
-                        baObj.errorLoadingAvailability();
+                        baObj.errorLoadingAvailability(idList);
                     }
                 }
             },
@@ -240,7 +269,7 @@ BlacklightAlma.prototype.loadAvailability = function() {
         return $(element).data("availabilityIds");
     }).get();
 
-    var idArrays = this.partitionArray(10, allIds);
+    var idArrays = this.partitionArray(baObj.BATCH_SIZE, allIds);
 
     idArrays.forEach(function(idArray) {
         var idArrayStr = idArray.join(",");

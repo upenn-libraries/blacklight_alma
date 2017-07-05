@@ -133,7 +133,9 @@ module BlacklightAlma
           # }
           Blacklight.logger.error("ALMA JSON response contains error code=#{api_response}")
           response_data = {
-              'error' => "ALMA error: #{web_service_result['errorList']}"
+             # not clear why it's called 'errorList', could value be an array sometimes? not sure.
+             # for this reason, we pass it wholesale.
+              'error' => web_service_result['errorList'].present? ? web_service_result['errorList'] : 'Unknown error from ALMA API'
           }
         end
       else
