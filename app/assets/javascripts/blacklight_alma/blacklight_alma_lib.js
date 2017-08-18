@@ -16,34 +16,49 @@ var BlacklightAlma = function (options) {
  * @param holding
  * @returns {string}
  */
-BlacklightAlma.prototype.formatHolding = function (mms_id, holding) {
-    if(holding['inventory_type'] == 'physical') {
-        var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
-        return [holding['availability'], libraryAndLocation, holding['call_number']]
-            .filter(function (item) {
-                return item != null && item.length > 0;
-            }).join(". ");
-    }
-    else if(holding['inventory_type'] == 'digital') {
-        var joined = [holding['institution'], holding['repository_name'], holding['label'], holding['representation']]
-            .filter(function (item) {
-                return item != null && item.length > 0;
-            }).join(" - ");
-        return joined || "Digital Resource (no other information available)";
-    }
-    else if(holding['inventory_type'] == 'electronic') {
-        var url = null;
-        if(holding['link_to_service_page']) {
-            var text = holding['collection'] || "Electronic resource";
-            url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
-        }
-        url = url || "Electronic Resource (no URL available)";
-        return [url, holding['coverage_statement']]
-            .filter(function (item) {
-                return item != null && item.length > 0;
-            }).join(" - ");
-    }
-};
+ availabilityInfo = function (holding) {
+   var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
+   var capitalAvail = holding['availability'].charAt(0).toUpperCase() + holding['availability'].slice(1);
+   if(holding['availability'] === 'available') {
+     return [capitalAvail, 'at', libraryAndLocation, holding['call_number']]
+         .filter(function (item) {
+             return item != null && item.length > 0;
+         }).join(" ");
+   }
+   else if(holding['availability'] === 'unavailable') {
+     return "Checked out or temporarily unavailable"
+   } else {
+     return [holding['availability'], libraryAndLocation, holding['call_number']]
+         .filter(function (item) {
+             return item != null && item.length > 0;
+         }).join(" ");
+   }
+ }
+
+ BlacklightAlma.prototype.formatHolding = function (mms_id, holding) {
+     if(holding['inventory_type'] == 'physical') {
+       return availabilityInfo(holding);
+     }
+     else if(holding['inventory_type'] == 'digital') {
+         var joined = [holding['institution'], holding['repository_name'], holding['label'], holding['representation']]
+             .filter(function (item) {
+                 return item != null && item.length > 0;
+             }).join(" - ");
+         return joined || "Digital Resource (no other information available)";
+     }
+     else if(holding['inventory_type'] == 'electronic') {
+         var url = null;
+         if(holding['link_to_service_page']) {
+             var text = holding['collection'] || "Electronic resource";
+             url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
+         }
+         url = url || "Electronic Resource (no URL available)";
+         return [url, holding['coverage_statement']]
+             .filter(function (item) {
+                 return item != null && item.length > 0;
+             }).join(" - ");
+     }
+ };
 
 /**
  * Subclasses should override to customize.
