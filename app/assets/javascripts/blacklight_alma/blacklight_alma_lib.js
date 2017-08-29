@@ -20,15 +20,15 @@ var BlacklightAlma = function (options) {
  availabilityButton = function(holding, i) {
    var button = document.createElement("button");
    if(holding['availability'] == 'available') {
-     button.setAttribute("class", "btn btn-success btn-sm");
+     button.setAttribute("class", "btn btn-success btn-sm avail-button");
      var text = document.createTextNode("Available");
    }
    else if(holding['availability'] == 'unavailable') {
-     button.setAttribute("class", "btn btn-warning btn-sm");
+     button.setAttribute("class", "btn btn-warning btn-sm avail-button");
      var text = document.createTextNode("Not Available");
    }
    else if(holding['inventory_type'] == 'electronic' || holding['inventory_type'] == 'digital' ) {
-     button.setAttribute("class", "btn btn-info btn-sm");
+     button.setAttribute("class", "btn btn-info btn-sm avail-button");
      var text = document.createTextNode("Online");
    }
    button.appendChild(text);
