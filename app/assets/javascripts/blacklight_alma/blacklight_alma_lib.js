@@ -62,11 +62,7 @@ var BlacklightAlma = function (options) {
 
  BlacklightAlma.prototype.formatHolding = function (mms_id, holding) {
      if(holding['inventory_type'] == 'physical') {
-         var libraryAndLocation = [holding['library'], holding['location']].join(" - ");
-         return [holding['availability'], libraryAndLocation, holding['call_number']]
-             .filter(function (item) {
-                 return item != null && item.length > 0;
-             }).join(". ");
+         return availabilityInfo(holding);
      }
      else if(holding['inventory_type'] == 'digital') {
          var joined = [holding['institution'], holding['repository_name'], holding['label'], holding['representation']]
