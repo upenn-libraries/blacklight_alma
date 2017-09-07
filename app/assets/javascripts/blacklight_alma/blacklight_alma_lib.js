@@ -174,7 +174,7 @@ var BlacklightAlma = function (options) {
  BlacklightAlma.prototype.loadAvailabilityAjax = function (idList, attemptCount) {
      var baObj = this;
      if(idList.length > 0) {
-         var url = "/alma/availability.json?id_list=" + encodeURIComponent(idList);
+         var url = $('#alma_availability_url').data('url') + "?id_list=" + encodeURIComponent(idList);
          console.log(url);
          $.ajax(url, {
              success: function(data, textStatus, jqXHR) {
