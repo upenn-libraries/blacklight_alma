@@ -121,7 +121,7 @@ var BlacklightAlma = function (options) {
                  var holdings = baObj.availability[id]['holdings'] || [];
                  if (holdings.length > 0) {
                      var formatted = $.map(holdings, function(holding) {
-                       availabilityButton(holding, id);
+                       //availabilityButton(holding, id);
                        return baObj.formatHolding(id, holding);
                      });
                      return baObj.formatHoldings(formatted);
@@ -263,17 +263,17 @@ var BlacklightAlma = function (options) {
   */
  BlacklightAlma.prototype.toggleAvailabilityDetailsForRecord = function(toggleElement, containerElement) {
      var baObj = this;
-     var newTextForToggle;
+     //var newTextForToggle;
      if ($(containerElement).find("iframe").length == 0) {
          var url = $(containerElement).data("availabilityIframeUrl");
          var iframe = baObj.createIframeElement(url);
          $(containerElement).html(iframe);
-         newTextForToggle = $(toggleElement).data("hideText");
+         //newTextForToggle = $(toggleElement).data("hideText");
      } else {
          $(containerElement).find("iframe").remove();
-         newTextForToggle = $(toggleElement).data("showText");
+         //newTextForToggle = $(toggleElement).data("showText");
      }
-     $(toggleElement).html(newTextForToggle);
+     $(toggleElement).html();
  };
 
  /**
