@@ -17,28 +17,17 @@ var BlacklightAlma = function (options) {
  * @returns {string}
  */
 
- availabilityButton = function(holding, i) {
-   var button = document.createElement("button");
+ availabilityButton = function(holding) {
    if(holding['availability'] == 'available') {
-     button.setAttribute("class", "btn btn-success btn-sm avail-button");
-     var text = document.createTextNode("Available");
+     $('.availability-toggle-details').text("Available");
+     $('.availability-toggle-details').removeClass("btn-default");
+     $('.availability-toggle-details').addClass("btn-success");
    }
    else if(holding['availability'] == 'unavailable') {
-     button.setAttribute("class", "btn btn-warning btn-sm avail-button");
-     var text = document.createTextNode("Not Available");
+     $('.availability-toggle-details').text(" Not Available");
+     $('.availability-toggle-details').removeClass("btn-default");
+     $('.availability-toggle-details').addClass("btn-warning");
    }
-   else if(holding['inventory_type'] == 'electronic' || holding['inventory_type'] == 'digital' ) {
-     button.setAttribute("class", "btn btn-info btn-sm avail-button");
-     var text = document.createTextNode("Online");
-   }
-   button.appendChild(text);
-   var element = $('[data-availability-ids="'+ i + '"]');
-   if($(element[0].parentElement).find("button").length < 2) {
-   element.before(button);
-   $(button).click(function() {
-     location.href="catalog/" + i;
-   });
-  }
  }
 
  availabilityInfo = function (holding) {
@@ -121,7 +110,7 @@ var BlacklightAlma = function (options) {
                  var holdings = baObj.availability[id]['holdings'] || [];
                  if (holdings.length > 0) {
                      var formatted = $.map(holdings, function(holding) {
-                       //availabilityButton(holding, id);
+                       availabilityButton(holding);
                        return baObj.formatHolding(id, holding);
                      });
                      return baObj.formatHoldings(formatted);
