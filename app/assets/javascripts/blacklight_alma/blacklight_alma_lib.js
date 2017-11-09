@@ -53,25 +53,6 @@ var BlacklightAlma = function (options) {
      if(holding['inventory_type'] == 'physical') {
          return availabilityInfo(holding);
      }
-     else if(holding['inventory_type'] == 'digital') {
-         var joined = [holding['institution'], holding['repository_name'], holding['label'], holding['representation']]
-             .filter(function (item) {
-                 return item != null && item.length > 0;
-             }).join(" - ");
-         return joined || "Digital Resource (no other information available)";
-     }
-     else if(holding['inventory_type'] == 'electronic') {
-         var url = null;
-         if(holding['link_to_service_page']) {
-             var text = holding['collection'] || "Electronic resource";
-             url = '<a href="' + holding['link_to_service_page'] + '">' + text + '</a>';
-         }
-         url = url || "Electronic Resource (no URL available)";
-         return [url, holding['coverage_statement']]
-             .filter(function (item) {
-                 return item != null && item.length > 0;
-             }).join(" - ");
-     }
  };
 
  /**
