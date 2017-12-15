@@ -21,18 +21,15 @@ var BlacklightAlma = function (options) {
    var availButton = $("button[data-availability-ids='" + id + "']");
    if (!$(availButton).hasClass("btn-success")) {
      if(holding['availability'] == 'available') {
-       console.log("success");
        $(availButton).text("Available");
        $(availButton).removeClass("btn-default");
        $(availButton).addClass("btn-success");
        $(availButton).show();
      }
      else if(holding['availability'] == 'check_holdings') {
-       console.log("check");
        $(availButton).hide();
      }
      else {
-       console.log("nothing");
        $(availButton).text(" Not Available");
        $(availButton).removeClass("btn-default");
        $(availButton).addClass("btn-warning");
