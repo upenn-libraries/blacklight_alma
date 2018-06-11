@@ -196,6 +196,7 @@ Currently, cannot be updated for an existing item.
                 <xs:tags>api get post put</xs:tags>
               </xs:appinfo>
               <xs:documentation>Indicates whether the item is currently in temporary location. Default is False.
+					In order to move an item to a temporary location use PUT to change this field to true and modify the temp_library and temp_location to the relevant codes.
 					</xs:documentation>
             </xs:annotation>
           </xs:element>
@@ -592,6 +593,31 @@ Possible codes are listed in 'PROCESSTYPE' [code table|https://developers.exlibr
               </xs:simpleContent>
             </xs:complexType>
           </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="inventory_number" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The number of this physical item.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="inventory_date" type="xs:date">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The date the item was modified.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="inventory_price" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The price of the item. The value is assumed to be in
+					the default currency for your institution.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element maxOccurs="1" minOccurs="0" name="library">
             <xs:annotation>
               <xs:appinfo>
@@ -655,6 +681,14 @@ Possible codes are listed in 'CallNumberType' [code table|https://developers.exl
               </xs:simpleContent>
             </xs:complexType>
           </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="alt_number_source" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get post put</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The ID number for the item that corresponds to the alternative call number type.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
           <xs:element maxOccurs="1" minOccurs="0" name="storage_location_id" type="xs:string">
             <xs:annotation>
               <xs:appinfo>
@@ -693,6 +727,15 @@ Possible codes are listed in 'CallNumberType' [code table|https://developers.exl
                 <xs:tags>api get post put</xs:tags>
               </xs:appinfo>
               <xs:documentation>Contains note content that is displayed during the circulation process.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="due_date_policy" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The loan policy as displayed in discovery. This field will be populated only if the 'expand' query parameter is sent.
+					</xs:documentation>
             </xs:annotation>
           </xs:element>
           <xs:element maxOccurs="1" minOccurs="0" name="internal_note_1" type="xs:string">
@@ -843,18 +886,6 @@ Returned only when view=label.</xs:documentation>
             </xs:annotation>
           </xs:element>
         </xs:all>
-      </xs:complexType>
-      <xs:complexType name="network_numbers">
-        <xs:annotation>
-          <xs:appinfo>
-            <xs:tags>api get</xs:tags>
-          </xs:appinfo>
-          <xs:documentation>The control numbers of this bibliographic record. Output parameter.
-Returned only when view=label.</xs:documentation>
-        </xs:annotation>
-        <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="network_number" type="xs:string"/>
-        </xs:sequence>
       </xs:complexType>
       <xs:complexType name="library_address">
         <xs:annotation>
@@ -1194,20 +1225,79 @@ Returned only when view=label.</xs:documentation>
               <xs:documentation>The id of the record in the original system. Output parameter.</xs:documentation>
             </xs:annotation>
           </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="cataloging_level">
+            <xs:annotation>
+              <xs:documentation>
+						The cataloging level of the bibliographic record. Possible codes are listed in 'CatalogerLevel' [code table|https://developers.exlibrisgroup.com/blog/Working-with-the-code-tables-API].
+					</xs:documentation>
+              <xs:appinfo>
+                <xs:tags>api get post put</xs:tags>
+                <xs:codeTable>CatalogerLevel</xs:codeTable>
+              </xs:appinfo>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="xs:string">
+                  <xs:attribute name="desc" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
           <xs:any maxOccurs="unbounded" minOccurs="0" namespace="##other" processContents="lax"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="warnings" type="warnings">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>Warnings returned by the validation process when creating or updating a bibliographic record</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="requests">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>Number of requests for title. Output parameter.</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="xs:int">
+                  <xs:attribute name="link" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
         </xs:sequence>
         <xs:attribute name="link" type="xs:string" use="optional"/>
       </xs:complexType>
-      <xs:complexType name="network_numbers">
+      <xs:complexType name="warnings">
+        <xs:annotation>
+          <xs:documentation>List of warnings returned by the validation process when creating or updating a bibliographic record</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="warning" type="warning">
+            <xs:annotation>
+              <xs:documentation>Specific warning.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="warning">
         <xs:annotation>
           <xs:appinfo>
             <xs:tags>api get</xs:tags>
           </xs:appinfo>
-          <xs:documentation>The control numbers of this bibliographic record. Output parameter.
-Returned only when view=label.</xs:documentation>
+          <xs:documentation>Validation warning.</xs:documentation>
         </xs:annotation>
         <xs:sequence>
-          <xs:element maxOccurs="unbounded" minOccurs="0" name="network_number" type="xs:string"/>
+          <xs:element maxOccurs="1" minOccurs="0" name="message" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>Validation warning message.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
         </xs:sequence>
       </xs:complexType>
     </xs:schema>
@@ -1694,6 +1784,192 @@ Returned only when view=label.</xs:documentation>
         </xs:attribute>
       </xs:complexType>
     </xs:schema>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified">
+      <xs:annotation>
+        <xs:documentation>
+The allowed request options for a given user id.
+This information should be used by 3rd party discovery in order to display the valid options.
+		</xs:documentation>
+      </xs:annotation>
+      <xs:element name="request_options" type="request_options"/>
+      <xs:complexType name="request_options">
+        <xs:annotation>
+          <xs:documentation>A request options object.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element maxOccurs="unbounded" minOccurs="0" name="request_option" type="request_option">
+            <xs:annotation>
+              <xs:documentation>An allowed request option.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="request_option">
+        <xs:annotation>
+          <xs:documentation>An allowed request option.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+          <xs:element maxOccurs="1" minOccurs="0" name="type">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+                <xs:codeTable>requestOptions</xs:codeTable>
+              </xs:appinfo>
+              <xs:documentation>
+						The type of request.
+						Possible codes are listed in 'RequestOptions' [code table|https://developers.exlibrisgroup.com/blog/Working-with-the-code-tables-API].
+					</xs:documentation>
+            </xs:annotation>
+            <xs:complexType>
+              <xs:simpleContent>
+                <xs:extension base="xs:string">
+                  <xs:attribute name="desc" type="xs:string" use="optional"/>
+                </xs:extension>
+              </xs:simpleContent>
+            </xs:complexType>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="1" name="request_url" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>api get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>URL for request.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="general_electronic_service_details" type="general_electronic_service_details">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>
+						General electronic service related information.
+						Relevant when type is GES.
+					</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="rs_broker_details" type="rs_broker_details">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>
+						Resource sharing broker related information.
+						Relevant when type is RS_BROKER.
+					</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:all>
+      </xs:complexType>
+      <xs:complexType name="general_electronic_service_details">
+        <xs:annotation>
+          <xs:appinfo>
+            <xs:tags>get</xs:tags>
+          </xs:appinfo>
+          <xs:documentation>
+				General electronic service related information.
+				Relevant when type is GES.
+			</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="code" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The internal code for the service.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="name" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The internal name used for the service.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="description" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The description of the service.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="public_name" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The label for displaying in discovery.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="public_note" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The note or description of the service for dislaying in discovery.
+					</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="avail_for_physical" type="xs:boolean">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>Indication whether the service should be displayed for physical resources.
+					</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="avail_for_electronic" type="xs:boolean">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>Indication whether the service should be displayed for electronic resources.
+					</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="rs_broker_details">
+        <xs:annotation>
+          <xs:appinfo>
+            <xs:tags>get</xs:tags>
+          </xs:appinfo>
+          <xs:documentation>
+				Resource sharing broker related information.
+				Relevant when type is RS_BROKER.
+			</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+          <xs:element maxOccurs="1" minOccurs="0" name="code" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The internal code for the partner.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="name" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The name used for the partner.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+          <xs:element maxOccurs="1" minOccurs="0" name="loan_period" type="xs:string">
+            <xs:annotation>
+              <xs:appinfo>
+                <xs:tags>get</xs:tags>
+              </xs:appinfo>
+              <xs:documentation>The amount of time the user has before having to return the item to the resource sharing library.</xs:documentation>
+            </xs:annotation>
+          </xs:element>
+        </xs:sequence>
+      </xs:complexType>
+    </xs:schema>
   </grammars>
   <resources base="https://api-na.hosted.exlibrisgroup.com">
     <resource path="/almaws/v1/bibs">
@@ -1702,20 +1978,23 @@ Returned only when view=label.</xs:documentation>
 
 To include physical inventory information use "expand=p_avail": 
 AVA field is added per holding record as following: 
-$$a - Institution code, $$b - Library code, $$c - Location display name, 
+$$a - Institution code, $$b - Library code, $$c - Location display name, $$h - Campus, 
 $$d - Call number, $$e - Availability (such as available, unavailable, or check_holdings), 
 $$j - Location code, $$k - Call number type, $$f - total items, $$g - non available items, 
-$$p - priority. 
+$$h - Calculated summary information, 
+$$p - priority, $$0 - Bib record ID, $$8 - Holdings ID, $$t - Holdings Information, $$q - library name.
  Note: When using the API against a NZ Institution AVA fields will be retrieved for each member which has holdings.
 
 To include digital inventory information use: "expand=d_avail": 
 AVD field is added per Representations, as following: 
-$$a - Institution code, $$b - Representations ID, $$c - REPRESENTATION/REMOTE_REPRESENTATION, $$d - Repository Name, $$e - Label, 
+$$a - Institution code, $$b - Representations ID, $$c - REPRESENTATION/REMOTE_REPRESENTATION, $$d - Repository Name, $$e - Label, $$f - Public Note, $$h - Full Text Link, $$r - IED. 
 
 To include electronic inventory information use: "expand=e_avail": 
 AVE field is added per portfolio, as following: 
 $$l -library code, $$m - Collection name, $$n - Public note, $$u - link to the bibliographic record's services page, 
 $$s - coverage statement (as displayed in Primo's ViewIt mashup), $$t - Interface name. 
+$$8 - portfolio pid, $$c - collection identifier for the electronic resource, $$e - activation status. 
+$$i - Available for institution, $$a - Available for library, $$b - Available for campus. 
 Note:  $$u will be created based on a Customer Parameter in the "Customer Parameters" mapping table (module: general): publishing_base_url.
 
 Note: The expand parameter is not supported for Dublin Core records. 
@@ -1727,7 +2006,7 @@ MMS ID is in the 001 marc field. These additional shared IDs can be used for bet
 identification of a common record. The local MMS ID should be used when there is a need to call 
 an API in the institution for the record.</doc>
         <request>
-          <param name="mms_id" style="query" type="xs:string">
+          <param name="mms_id" style="query" default="" type="xs:string">
             <doc>A list of Bib Record IDs (for example: 99939650000541,99939680000541) from 1 to the limit of 100</doc>
           </param>
           <param name="ie_id" style="query" default="" type="xs:string">
@@ -1742,7 +2021,7 @@ an API in the institution for the record.</doc>
           <param name="nz_mms_id" style="query" default="" type="xs:string">
             <doc>Network Zone ID</doc>
           </param>
-          <param name="view" style="query" type="xs:string">
+          <param name="view" style="query" default="full" type="xs:string">
             <doc>Use view=brief to retrieve without the MARCXML.</doc>
           </param>
           <param name="expand" style="query" default="None" type="xs:string">
@@ -1750,6 +2029,7 @@ an API in the institution for the record.</doc>
  p_avail - Expand physical inventory information.
  e_avail - Expand electronic inventory information.
  d_avail - Expand digital inventory information.
+ requests - Expand total number of title requests.
  To use more than one, use a comma separator.</doc>
           </param>
         </request>
@@ -1766,10 +2046,17 @@ an API in the institution for the record.</doc>
       </method>
       <method name="POST">
         <doc title="Create record">These web services create a new Bib record, and also allows creation of a local record for a NZ record.
- Note: JSON is not supported for this API.</doc>
+ Note: JSON is not supported for this API.
+For more information regarding the various options supported for this API see [here|https://developers.exlibrisgroup.com/blog/cataloging-APIs-enhancements].</doc>
         <request>
           <param name="from_nz_mms_id" style="query" default="" type="xs:string">
             <doc>The MMS_ID of the Network-Zone record. Leave empty when creating a regular local record.</doc>
+          </param>
+          <param name="normalization" style="query" default="" type="xs:string">
+            <doc>The id of the normalization profile to run.</doc>
+          </param>
+          <param name="validate" style="query" default="false" type="xs:string">
+            <doc>Boolean flag for indicating whether to validate the record. Default is: false.</doc>
           </param>
           <representation mediaType="application/xml">
             <doc>This method takes a Bib object. When creating linked record send an empty Bib object: &lt;bib/&gt;</doc>
@@ -1785,6 +2072,11 @@ an API in the institution for the record.</doc>
           <doc title="402210">Failed to create new bib.</doc>
           <doc title="33007">No record found for MMS id X</doc>
           <doc title="60105">JSON is not supported for this API.</doc>
+          <doc title="4022030">Invalid normalization profile ID.</doc>
+          <doc title="4022031">Failed to normalize record.</doc>
+          <doc title="4022032">The record failed validation (with specified error).</doc>
+          <doc title="4022033">Failed validation on the record.</doc>
+          <doc title="4022040">Cataloging level is not enabled for your institution.</doc>
           <representation mediaType="application/xml">
             <doc title="Bib">rest_bib.xsd</doc>
           </representation>
@@ -1793,15 +2085,55 @@ an API in the institution for the record.</doc>
           </representation>
         </response>
       </method>
+      <resource path="bf/entity/instance/{mms_id}">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID (for example, 99939650000541).</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Bibframe instance by mms ID">This API returns a bibframe for a specific instance, by given mms id</doc>
+          <request/>
+          <response>
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="402204">Input parameters mmsId X is not numeric.</doc>
+            <doc title="402203">Input parameters mmsId X is not valid.</doc>
+            <doc title="403000">Linked data profile is inactive</doc>
+            <representation mediaType="application/xml">
+              <param name="result" style="plain" type="xs:string"/>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="bf/entity/work/{frbr_id}">
+        <param name="frbr_id" style="template" type="xs:string">
+          <doc>The Frbr ID (for example, 75304155527224467).</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Bibframe work by frbr ID">This API returns a bibframe for a specific work, by given frbr id</doc>
+          <request/>
+          <response>
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="90110">Input parameters frbrId X is not valid.</doc>
+            <doc title="403000">Linked data profile is inactive</doc>
+            <representation mediaType="application/xml">
+              <param name="result" style="plain" type="xs:string"/>
+            </representation>
+          </response>
+        </method>
+      </resource>
       <resource path="collections">
         <method name="GET">
           <doc title="Retrieve Collections">This Web service returns a list of collections.</doc>
           <request>
             <param name="level" style="query" type="xs:string">
-              <doc>This parameter determines the number of levels of sub-collections should be retrieved. For example, 1 = only current; 2 = immediate decendants. Default is 1.</doc>
+              <doc>The number of levels of sub-collections to retrieve. Optional. For example, 1 = only current; 2 = immediate decendants. Does not work with query. Default is 1.</doc>
+            </param>
+            <param name="q" style="query" default="" type="xs:string">
+              <doc>Search query. Optional.  Does not work with levels parameter. Searching for text in library, collection name, external system or external ID. Multiple search terms may be combined with AND only.  For example q=external_system~x%20AND%20external_id~y.</doc>
             </param>
           </request>
           <response>
+            <doc title="60106">Invalid query format.</doc>
+            <doc title="402469">The library query was not valid.</doc>
             <representation mediaType="application/xml">
               <doc title="Collections">rest_collections.xsd</doc>
             </representation>
@@ -1813,6 +2145,9 @@ an API in the institution for the record.</doc>
         <method name="POST">
           <doc title="Create Collection">This Web service creates a collection.</doc>
           <request>
+            <param name="record_format" style="query" default="marc21" type="xs:string">
+              <doc>The record format which may be marc21, unimarc, kormarc, cnmarc, dc, dcap01, or dcap02.</doc>
+            </param>
             <representation mediaType="application/xml">
               <doc>This method takes a Collection object.</doc>
             </representation>
@@ -1821,6 +2156,13 @@ an API in the institution for the record.</doc>
             </representation>
           </request>
           <response>
+            <doc title="402215">An input parameter was not valid.</doc>
+            <doc title="402472">The collection Name must be provided.</doc>
+            <doc title="402471">The collection Name is a duplicate of another collection Name.</doc>
+            <doc title="402469">The Library of the collection was not found.</doc>
+            <doc title="402550">The Parent Pid of the collection was not found.</doc>
+            <doc title="402551">The collection creation failed.</doc>
+            <doc title="702266">Collection order must be greater than or equal to 0.</doc>
             <representation mediaType="application/xml">
               <doc title="Collection">rest_collection.xsd</doc>
             </representation>
@@ -1834,6 +2176,16 @@ an API in the institution for the record.</doc>
         <param name="pid" style="template" type="xs:string">
           <doc>The collection ID.</doc>
         </param>
+        <method name="DELETE">
+          <doc title="Remove a collection with no Bibs">This Web service removes a collection that has no Sub Collections and no Bibliographic titles attached.</doc>
+          <request/>
+          <response status="204">
+            <doc title="40166411">Param value is invalid.</doc>
+            <doc title="402552">The deletion failed.</doc>
+            <doc title="402553">The collection has a Bib attached.</doc>
+            <doc title="402555">The collection has sub collections.</doc>
+          </response>
+        </method>
         <method name="GET">
           <doc title="Retrieve Collection">This Web service returns a collection for a given pid.</doc>
           <request>
@@ -1842,6 +2194,32 @@ an API in the institution for the record.</doc>
             </param>
           </request>
           <response>
+            <representation mediaType="application/xml">
+              <doc title="Collection">rest_collection.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Collection">rest_collection.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="PUT">
+          <doc title="Update Collection">This Web service updates a collection.</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes a Collection object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a Collection object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="40166411">Param value is invalid.</doc>
+            <doc title="402469">The library was not found for the collection.</doc>
+            <doc title="402471">The collection Name is a duplicate of another collection Name.</doc>
+            <doc title="402472">The collection name must be provided.</doc>
+            <doc title="402468">An update or partial update failed.</doc>
+            <doc title="402554">The collection parent is not valid.</doc>
+            <doc title="702266">Collection order must be greater than or equal to 0.</doc>
             <representation mediaType="application/xml">
               <doc title="Collection">rest_collection.xsd</doc>
             </representation>
@@ -1933,6 +2311,28 @@ an API in the institution for the record.</doc>
           </response>
         </method>
       </resource>
+      <resource path="rda/entity/manifestation/{mms_id}">
+        <param name="mms_id" style="template" type="xs:string"/>
+        <method name="GET">
+          <request/>
+          <response>
+            <representation mediaType="application/xml">
+              <param name="result" style="plain" type="xs:string"/>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="rda/entity/work/{frbr_id}">
+        <param name="frbr_id" style="template" type="xs:string"/>
+        <method name="GET">
+          <request/>
+          <response>
+            <representation mediaType="application/xml">
+              <param name="result" style="plain" type="xs:string"/>
+            </representation>
+          </response>
+        </method>
+      </resource>
       <resource path="test">
         <method name="GET">
           <doc title="GET Inventory Test API">This API is used to test if the API key was configured correctly.</doc>
@@ -2011,29 +2411,53 @@ an API in the institution for the record.</doc>
       </resource>
       <resource path="{mms_id}">
         <param name="mms_id" style="template" type="xs:string">
-          <doc>The Bib Record ID  (for example, 99939650000541).</doc>
+          <doc>The Bib Record ID.</doc>
         </param>
+        <method name="DELETE">
+          <doc title="Delete Bib Record">This web service deletes a Bib Record.
+For more information regarding the various options supported for this API see [here|https://developers.exlibrisgroup.com/blog/cataloging-APIs-enhancements].</doc>
+          <request>
+            <param name="override" style="query" default="false" type="xs:string">
+              <doc>Override the warnings and delete the Bib Record. Optional. The default is to not override (false).</doc>
+            </param>
+            <param name="cataloger_level" style="query" default="" type="xs:string">
+              <doc>Cataloger level of the user deleting the record.</doc>
+            </param>
+          </request>
+          <response status="204">
+            <doc title="402203">An error has occured while validating the mms_id.</doc>
+            <doc title="401873">Input parameter mms_id or parameter override is not valid.</doc>
+            <doc title="4022020">Delete Bib error.</doc>
+            <doc title="40166454">Delete Bib error. Community Zone Bib cannot be deleted.</doc>
+            <doc title="4022040">Cataloging level is not enabled for your institution.</doc>
+            <doc title="4022041">Cannot update this record due to insufficient cataloger level privileges.</doc>
+          </response>
+        </method>
         <method name="GET">
           <doc title="Retrieve Bib">This web service returns a Bib record in an XML format. 
 
 To include physical inventory information use "expand=p_avail": 
 AVA field is added per holding record as following: 
-$$a - Institution code, $$b - Library code, $$c - Location display name, 
+$$a - Institution code, $$b - Library code, $$c - Location display name, $$h - Campus, 
 $$d - Call number, $$e - Availability (such as available, unavailable, or check_holdings), 
 $$j - Location code, $$k - Call number type, $$f - total items, $$g - non available items, 
-$$p - priority. 
+$$h - Calculated summary information, 
+$$p - priority, $$0 - Bib record ID, $$8 - Holdings ID, $$t - Holdings Information, $$q - library name.
  Note: When using the API against a NZ Institution AVA fields will be retrieved for each member which has holdings.
 
 To include digital inventory information use: "expand=d_avail": 
 AVD field is added per Representations, as following: 
-$$a - Institution code, $$b - Representations ID, $$c - REPRESENTATION/REMOTE_REPRESENTATION, $$d - Repository Name, $$e - Label, 
+$$a - Institution code, $$b - Representations ID, $$c - REPRESENTATION/REMOTE_REPRESENTATION, $$d - Repository Name, $$e - Label, $$f - Public Note, $$h - Full Text Link, $$r - IED. 
 
 To include electronic inventory information use: "expand=e_avail": 
 AVE field is added per portfolio, as following: 
 $$l - library code, $$m - Collection name, $$n - Public note, $$u - link to the bibliographic record's services page, 
 $$s - coverage statement (as displayed in Primo's ViewIt mashup), $$t - Interface name. 
+$$8 - portfolio pid, $$c - collection identifier for the electronic resource, $$e - activation status. 
+$$i - Available for institution, $$a - Available for library, $$b - Available for campus. 
 Note:  $$u will be created based on a Customer Parameter in the "Customer Parameters" mapping table (module: general): publishing_base_url. 
 
+Note: To retrieve multiple records using a single API call, the Get-Bibs API can be used with the mms_id parameter. 
 Note: The expand parameter is not supported for Dublin Core records. 
 Note: The bibliographic record retrieved from Alma is enriched with additional identifiers. 
 The MMS ID of the Network Zone and the Alma Community Zone ID are added to the record 
@@ -2043,15 +2467,15 @@ MMS ID is in the 001 marc field. These additional shared IDs can be used for bet
 identification of a common record. The local MMS ID should be used when there is a need to call 
 an API in the institution for the record.</doc>
           <request>
-            <param name="view" style="query" type="xs:string">
-              <doc>Use view=brief to retrieve without the MARCXML.</doc>
-
+            <param name="view" style="query" default="full" type="xs:string">
+              <doc>Use view=brief to retrieve without the MARCXML. Use view=local_fields to retrieve only local fields for an IZ record linked to an NZ record.</doc>
             </param>
             <param name="expand" style="query" default="None" type="xs:string">
               <doc>This parameter allows for expanding the bibliographic record with additional information:
  p_avail - Expand physical inventory information.
  e_avail - Expand electronic inventory information.
  d_avail - Expand digital inventory information.
+ requests - Expand total number of title requests.
  To use more than one, use a comma separator.</doc>
             </param>
           </request>
@@ -2067,10 +2491,12 @@ an API in the institution for the record.</doc>
             </representation>
           </response>
         </method>
-        <method name="PUT">
-          <doc title="Update Bib Record">This web service updates a Bib Record.
- Note: JSON is not supported, and updating a linked record is currently not supported.</doc>
+        <method name="POST">
+          <doc title="Operate on record">This web service performs an operation on a Bib record.  Currently, the supported operation is to unlink from NZ. Note: JSON is not supported for this API.</doc>
           <request>
+            <param name="op" style="query" type="xs:string">
+              <doc>The operation that is to be performed. Currently, only option is: unlink_from_nz.</doc>
+            </param>
             <representation mediaType="application/xml">
               <doc>This method takes a Bib object.</doc>
             </representation>
@@ -2080,9 +2506,60 @@ an API in the institution for the record.</doc>
           </request>
           <response>
             <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="40166452">Error - Not supported from the network zone.</doc>
+            <doc title="40166453">Error - Not supported from the institution zone.</doc>
+            <doc title="402278">Error - Parse exception for MARC record.</doc>
+            <doc title="402204">Input parameters mmsId X is not numeric.</doc>
+            <doc title="33007">No record found for MMS id X</doc>
+            <doc title="60105">JSON is not supported for this API.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Bib">rest_bib.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Bib">rest_bib.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="PUT">
+          <doc title="Update Bib Record">This web service updates a Bib Record.
+ Note: JSON is not supported, and updating a linked CZ record is currently not supported.
+For more information regarding the various options supported for this API see [here|https://developers.exlibrisgroup.com/blog/cataloging-APIs-enhancements].
+For an IZ record that is linked to NZ record, local fields will be replaced - based on $$9local field indication.
+Updating of non-local fields should be done directly on the NZ record.
+See [Working with APIs in a Network Topology|https://developers.exlibrisgroup.com/blog/Working-with-APIs-in-a-Network-Topology] for more details.</doc>
+          <request>
+            <param name="normalization" style="query" default="" type="xs:string">
+              <doc>The id of the normalization profile to run.</doc>
+            </param>
+            <param name="validate" style="query" default="false" type="xs:string">
+              <doc>Boolean flag for indicating whether to validate the record. Default is: false.</doc>
+            </param>
+            <param name="stale_version_check" style="query" default="false" type="xs:string">
+              <doc>Boolean flag for indicating whether to validate stale version of the record. When true, the 005 field of the MARC record must be identical to that of the record in the database. Default is: false.</doc>
+            </param>
+            <param name="cataloger_level" style="query" default="" type="xs:string">
+              <doc>Cataloger level of the user updating the record - used for validating that the level is sufficient. To change the record's level, use the payload's cataloging_level field.</doc>
+            </param>
+            <representation mediaType="application/xml">
+              <doc>This method takes a Bib object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a Bib object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="40166454">Error - Not supported from the community zone.</doc>
             <doc title="402204">Input parameters mmsId X is not numeric.</doc>
             <doc title="402203">Input parameters mmsId X is not valid.</doc>
             <doc title="60105">JSON is not supported for this API.</doc>
+            <doc title="4022030">Invalid normalization profile ID.</doc>
+            <doc title="4022031">Failed to normalize record.</doc>
+            <doc title="4022032">The record failed validation (with specified error).</doc>
+            <doc title="4022033">Failed validation on the record.</doc>
+            <doc title="4022034">A newer version of this record exists in the repository.</doc>
+            <doc title="4022040">Cataloging level is not enabled for your institution.</doc>
+            <doc title="4022041">Cannot update this record due to insufficient cataloger level privileges.</doc>
             <representation mediaType="application/xml">
               <doc title="Bib">rest_bib.xsd</doc>
             </representation>
@@ -2121,6 +2598,52 @@ an API in the institution for the record.</doc>
             </representation>
             <representation mediaType="application/json">
               <doc title="Booking Availability">rest_booking-availability.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/e-collections">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Electronic Collections for Bib record">This web service returns Electronic Collections for a Bib.</doc>
+          <request>
+            <param name="limit" style="query" default="10" type="xs:int">
+              <doc>Limits the number of results. Optional. Valid values are 0-100. Default value: 10.</doc>
+            </param>
+            <param name="offset" style="query" default="0" type="xs:int">
+              <doc>Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="402203">Input parameter mms Id is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Electronic Collections list">rest_electronic_collections.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Electronic Collections list">rest_electronic_collections.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/e-collections/{collection_id}">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <param name="collection_id" style="template" type="xs:string">
+          <doc>The Electronic Collection ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Electronic Collection">This web service returns an Electronic Collection for a Bib ID and an Electronic Collection ID.</doc>
+          <request/>
+          <response>
+            <doc title="60151">Failed to find the Electronic Collection ID.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Electronic Collection">rest_electronic_collection.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Electronic Collection">rest_electronic_collection.xsd</doc>
             </representation>
           </response>
         </method>
@@ -2178,6 +2701,22 @@ an API in the institution for the record.</doc>
         <param name="holding_id" style="template" type="xs:string">
           <doc>The Holding Record ID.</doc>
         </param>
+        <method name="DELETE">
+          <doc title="Delete Holdings Record">This web service deletes a Holdings Record.</doc>
+          <request>
+            <param name="bib" style="query" default="retain" type="xs:string">
+              <doc>Method for handling a Bib record left without any holdings: retain, delete or suppress. Optional. By default: retain.</doc>
+            </param>
+          </request>
+          <response status="204">
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="60212">Deletion of holdings record failed.</doc>
+            <doc title="402203">Bib ID not valid.</doc>
+            <doc title="60213">Holding ID not valid.</doc>
+            <doc title="60214">Holding has been deleted or cannot be deleted.</doc>
+            <doc title="60218">Invalid action on Bib record without holdings.</doc>
+          </response>
+        </method>
         <method name="GET">
           <doc title="Retrieve Holdings Record">This web service returns a Holdings Record. In order to use this service, authentication must be done by a user that has the 'API Fulfillment Read' role. Please note that the holding record is returned in MARC XML format, therefore it is not recommended to use this service with JSON format.</doc>
           <request/>
@@ -2219,10 +2758,13 @@ an API in the institution for the record.</doc>
           <doc>The Bib Record ID.</doc>
         </param>
         <param name="holding_id" style="template" type="xs:string">
-          <doc>The Holding Record ID.</doc>
+          <doc>The Holding Record ID. May be ALL to retrieve all holdings for a Bib.</doc>
         </param>
         <method name="GET">
-          <doc title="Retrieve Items list">This web service returns Items list.</doc>
+          <doc title="Retrieve Items list">This web service returns a list of Items.
+		  
+		  Note: It is possible to retrieve all the items under a bib record using 'ALL' in the holding_id path parameter.
+		  </doc>
           <request>
             <param name="limit" style="query" default="10" type="xs:int">
               <doc>Limits the number of results. Optional. Valid values are 0-100. Default value: 10.</doc>
@@ -2230,9 +2772,38 @@ an API in the institution for the record.</doc>
             <param name="offset" style="query" default="0" type="xs:int">
               <doc>Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.</doc>
             </param>
+            <param name="expand" style="query" default="" type="xs:string">
+              <doc>Parameter for enhancing result with additional information. Currently supported: due_date_policy</doc>
+            </param>
+            <param name="user_id" style="query" default="" type="xs:string">
+              <doc>The id of the user for which the discovery information will be calculated.</doc>
+            </param>
+            <param name="current_library" style="query" default="" type="xs:string">
+              <doc>The current library for the item. Relevant when using ALL for the Holdings ID.</doc>
+            </param>
+            <param name="current_location" style="query" default="" type="xs:string">
+              <doc>The current location of the item. Relevant when using ALL for the Holdings ID.</doc>
+            </param>
+            <param name="q" style="query" default="" type="xs:string">
+              <doc>Search from enum_a, enum_b, chron_i, chron_j, and description. Relevant when using ALL for the Holdings ID. (see [Brief Search|https://developers.exlibrisgroup.com/blog/How-we-re-building-APIs-at-Ex-Libris#BriefSearch])</doc>
+            </param>
+            <param name="order_by" style="query" default="none" type="xs:string">
+              <doc>The sort order. Ordering may be selected by chron_i, description, enum_a, enum_b, enum_c, library, location or temporary_location. Relevant when using ALL for the Holdings ID. There is no default.</doc>
+            </param>
+            <param name="direction" style="query" default="desc" type="xs:string">
+              <doc>The sort direction of desc (default) or asc. Relevant when using ALL for the Holdings ID.</doc>
+            </param>
+
           </request>
           <response>
             <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <doc title="402203">The Bib Record is not valid.</doc>
+            <doc title="401688">Error while retrieving items.</doc>
+            <doc title="402469">Current library is not valid.</doc>
+            <doc title="60215">Current location is not valid.</doc>
+            <doc title="60216">The ordering is not valid.</doc>
+            <doc title="60106">Invalid query format.</doc>
+            <doc title="60217">The offset is too large.</doc>
             <representation mediaType="application/xml">
               <doc title="Items list">rest_items.xsd</doc>
             </representation>
@@ -2382,10 +2953,17 @@ an API in the institution for the record.</doc>
         </method>
         <method name="GET">
           <doc title="Retrieve Item and label printing information">This web service returns Item information. 
-Note: It is also possible to retrieve item information by using: GET /almaws/v1/items?item_barcode={item_barcode}. Calling this shorthand URL will return an HTTP 302 redirect response leading to a URL with the structure documented here.</doc>
+
+Note: It is also possible to retrieve item information by barcode using: GET /almaws/v1/items?item_barcode={item_barcode}. Calling this shorthand URL will return an HTTP 302 redirect response leading to a URL with the structure documented here.</doc>
           <request>
             <param name="view" style="query" default="brief" type="xs:string">
               <doc>Special view of Item object. Optional. Currently supported: label - adds fields relevant for label printing.</doc>
+            </param>
+            <param name="expand" style="query" default="" type="xs:string">
+              <doc>Parameter for enhancing result with additional information. Currently supported: due_date_policy</doc>
+            </param>
+            <param name="user_id" style="query" default="" type="xs:string">
+              <doc>The id of the user which the due_date_policy expand will be calculated for. Default: GUEST.</doc>
             </param>
           </request>
           <response>
@@ -2578,6 +3156,75 @@ Note: It is also possible to retrieve item information by using: GET /almaws/v1/
             </representation>
           </response>
         </method>
+        <method name="POST">
+          <doc title="Action on a loan">This Web service performs an action on a loan.</doc>
+          <request>
+            <param name="op" style="query" type="xs:string">
+              <doc>Operation. Currently only op=renew is supported</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="401823">Loan ID XXX does not exist.</doc>
+            <doc title="401822">Cannot renew loan: Loan ID XXX.</doc>
+            <doc title="60211">Loan operation not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Item Loan">rest_item_loan.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Item Loan">rest_item_loan.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="PUT">
+          <doc title="Change loan due date">This Web service changes a loan due date.</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes an item loan object</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes an item loan object</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="401823">Loan ID XXX does not exist.</doc>
+            <doc title="401824">Due date is not in loan object.</doc>
+            <doc title="401681">Due date cannot be in the past.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Item Loan">rest_item_loan.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Item Loan">rest_item_loan.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/holdings/{holding_id}/items/{item_pid}/request-options">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <param name="holding_id" style="template" type="xs:string">
+          <doc>The Holding Record ID.</doc>
+        </param>
+        <param name="item_pid" style="template" type="xs:string">
+          <doc>The Item ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve request options.">Retrieve the request options for this item.</doc>
+          <request>
+            <param name="user_id" style="query" default="GUEST" type="xs:string">
+              <doc>The id of the user for which the request options will be calculated. Default value: GUEST</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Request Options">rest_request_options.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Request Options">rest_request_options.xsd</doc>
+            </representation>
+          </response>
+        </method>
       </resource>
       <resource path="{mms_id}/holdings/{holding_id}/items/{item_pid}/requests">
         <param name="mms_id" style="template" type="xs:string">
@@ -2713,6 +3360,249 @@ Note: It is also possible to retrieve item information by using: GET /almaws/v1/
           </response>
         </method>
       </resource>
+      <resource path="{mms_id}/portfolios">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Portfolios list">This web service returns Portfolios for a Bib.</doc>
+          <request>
+            <param name="limit" style="query" default="10" type="xs:int">
+              <doc>Limits the number of results. Optional. Valid values are 0-100. Default value: 10.</doc>
+            </param>
+            <param name="offset" style="query" default="0" type="xs:int">
+              <doc>Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="402203">Input parameter mms Id is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Portfolios list">rest_portfolios.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Portfolios list">rest_portfolios.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/portfolios/">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <method name="POST">
+          <doc title="Create Portfolio for a Bib">This web service creates a Portfolio for a Bib.</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes a portfolio object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a portfolio object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="60221">The MMS ID is not valid.</doc>
+            <doc title="60161">The portfolio availability code is not valid.</doc>
+            <doc title="60222">Failed to create the IEE metadata.</doc>
+            <doc title="60163">Failed to create the TPS metadata.</doc>
+            <doc title="60164">Failed to create the Portfolio metadata.</doc>
+            <doc title="60165">A metadata operation has failed.</doc>
+            <doc title="60166">The URL type is not valid.</doc>
+            <doc title="60167">The proxy enable flag is not valid.</doc>
+            <doc title="60168">The proxy code is not valid.</doc>
+            <doc title="60169">The license is not valid.</doc>
+            <doc title="60170">The coverage in use is not valid.</doc>
+            <doc title="60171">The material type is not valid.</doc>
+            <doc title="60172">The PO line reference is not valid.</doc>
+            <doc title="402469">The library code is not valid.</doc>
+            <doc title="60223">The interface name is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Create Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Create Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/portfolios/{portfolio_id}">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <param name="portfolio_id" style="template" type="xs:string">
+          <doc>The Electronic Portfolio ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve Portfolio">This web service returns a Portfolio for a Bib ID and an Electronic Portfolio ID.</doc>
+          <request/>
+          <response>
+            <doc title="402203">Input parameter mms Id is not valid.</doc>
+            <doc title="60123">Failed to find the Portfolio ID.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="PUT">
+          <doc title="Update Portfolio for a Bib">This web service updates a Portfolio for a Bib.</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes a portfolio object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a portfolio object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="60221">The MMS ID is not valid.</doc>
+            <doc title="60123">Failed to find the Portfolio ID.</doc>
+            <doc title="60161">The portfolio availability code is not valid.</doc>
+            <doc title="60165">A metadata operation has failed.</doc>
+            <doc title="60166">The URL type is not valid.</doc>
+            <doc title="60167">The proxy enable flag is not valid.</doc>
+            <doc title="60168">The proxy code is not valid.</doc>
+            <doc title="60169">The license is not valid.</doc>
+            <doc title="60170">The coverage in use is not valid.</doc>
+            <doc title="60171">The material type is not valid.</doc>
+            <doc title="60172">The PO line reference is not valid.</doc>
+            <doc title="402469">The library code is not valid.</doc>
+            <doc title="60223">The interface name is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Update Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Update Portfolio">rest_portfolio.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/reminders">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>MMS ID. Required.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve a list of Reminders for BIB">This Web service returns a list of Reminders for a BIB Entity.
+</doc>
+          <request>
+            <param name="type" style="query" default="" type="xs:string">
+              <doc>Type for filtering. Optional. Valid values are from the ReminderTypes code table</doc>
+            </param>
+            <param name="status" style="query" default="" type="xs:string">
+              <doc>Status for filtering. Optional. Valid values are from the ReminderStatuses code table</doc>
+            </param>
+            <param name="from" style="query" default="" type="xs:string">
+              <doc>From this Date (YYYY-MM-DD). Optional. Defaults to today.</doc>
+            </param>
+            <param name="to" style="query" default="" type="xs:string">
+              <doc>To this Date (YYYY-MM-DD). Optional. Defaults to the From Date.</doc>
+            </param>
+            <param name="order_by" style="query" default="type" type="xs:string">
+              <doc>Order by parameter. Optional. Valid values are type, status, reminder_date.</doc>
+            </param>
+            <param name="direction" style="query" default="asc" type="xs:string">
+              <doc>Direction parameter. Optional. Valid values are asc, desc.</doc>
+            </param>
+            <param name="limit" style="query" default="10" type="xs:int">
+              <doc>Limits the number of results. Optional. Valid values are 0-100. Default value: 10.</doc>
+            </param>
+            <param name="offset" style="query" default="0" type="xs:int">
+              <doc>Offset of the results returned. Optional. Default value: 0, which means that the first results will be returned.</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="60221">Parameter value mms_id is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Reminders">rest_reminders.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Reminders">rest_reminders.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="POST">
+          <doc title="Creates a Reminder for BIB">This Web service creates a Reminder for a BIB Entity.
+</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes a reminder object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a reminder object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="60221">Parameter value mms_id is not valid.</doc>
+            <doc title="60178">Reminder Type is not valid.</doc>
+            <doc title="60179">Reminder Status is not valid.</doc>
+            <doc title="60180">Reminder not created.</doc>
+            <doc title="60184">Reminder Entity Id is required.</doc>
+            <doc title="60185">Reminder Date is required.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/reminders/{reminder_id}">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>MMS ID. Required.</doc>
+        </param>
+        <param name="reminder_id" style="template" type="xs:string">
+          <doc>Reminder ID. Required.</doc>
+        </param>
+        <method name="DELETE">
+          <doc title="Delete a Reminder for BIB">This Web service deletes a Reminder for a BIB Entity.
+</doc>
+          <request/>
+          <response status="204">
+            <doc title="60177">Reminder ID is not valid.</doc>
+          </response>
+        </method>
+        <method name="GET">
+          <doc title="Retrieve a Reminder for BIB">This Web service returns a Reminder for a BIB Entity.
+</doc>
+          <request/>
+          <response>
+            <doc title="60177">Reminder ID is not valid.</doc>
+            <doc title="60221">Parameter value mms_id is not valid.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+          </response>
+        </method>
+        <method name="PUT">
+          <doc title="Update a Reminder for BIB">This Web service updates a Reminder for a BIB Entity.
+</doc>
+          <request>
+            <representation mediaType="application/xml">
+              <doc>This method takes a reminder object.</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc>This method takes a reminder object.</doc>
+            </representation>
+          </request>
+          <response>
+            <doc title="60177">Reminder ID is not valid.</doc>
+            <doc title="60178">Reminder Type is not valid.</doc>
+            <doc title="60179">Reminder Status is not valid.</doc>
+            <doc title="60181">Reminder not updated.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Reminder">rest_reminder.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
       <resource path="{mms_id}/representations">
         <param name="mms_id" style="template" type="xs:string">
           <doc>The Bib Record ID.</doc>
@@ -2776,7 +3666,7 @@ Note: It is also possible to retrieve item information by using: GET /almaws/v1/
               <doc>Indication whether the representation should be deleted even if warnings exist. Optional. By default: false.</doc>
             </param>
             <param name="bibs" style="query" default="retain" type="xs:string">
-              <doc>Method for handling a representation left without any files: retain , suppress or delete. Optional. By default: retain.</doc>
+              <doc>Method for handling a bib left without any representations: retain , suppress or delete. Optional. By default: retain.</doc>
             </param>
           </request>
           <response>
@@ -2884,7 +3774,7 @@ Note: It is also possible to retrieve item information by using: GET /almaws/v1/
               <doc>Method for handling a representation left without any files: retain or delete. Optional. By default: retain.</doc>
             </param>
             <param name="bibs" style="query" default="retain" type="xs:string">
-              <doc>Method for handling a representation left without any files: retain , suppress or delete. Optional. By default: retain.</doc>
+              <doc>Method for handling a bib left without any representations: retain , suppress or delete. Optional. By default: retain.</doc>
             </param>
           </request>
           <response>
@@ -2927,6 +3817,28 @@ Note: It is also possible to retrieve item information by using: GET /almaws/v1/
             </representation>
             <representation mediaType="application/json">
               <doc title="RepresentationFile">rest_representation_file.xsd</doc>
+            </representation>
+          </response>
+        </method>
+      </resource>
+      <resource path="{mms_id}/request-options">
+        <param name="mms_id" style="template" type="xs:string">
+          <doc>The Bib Record ID.</doc>
+        </param>
+        <method name="GET">
+          <doc title="Retrieve request options.">Retrieve the request options for this item.</doc>
+          <request>
+            <param name="user_id" style="query" default="GUEST" type="xs:string">
+              <doc>The id of the user for which the request options will be calculated. Default value: GUEST</doc>
+            </param>
+          </request>
+          <response>
+            <doc title="401652">General Error - An error has occurred while processing the request.</doc>
+            <representation mediaType="application/xml">
+              <doc title="Request Options">rest_request_options.xsd</doc>
+            </representation>
+            <representation mediaType="application/json">
+              <doc title="Request Options">rest_request_options.xsd</doc>
             </representation>
           </response>
         </method>
