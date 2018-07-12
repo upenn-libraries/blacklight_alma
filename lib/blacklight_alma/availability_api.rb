@@ -22,6 +22,7 @@ module BlacklightAlma
             'p' => 'priority',
             'q' => 'library',
             't' => 'holding_info',
+            '0' => 'mmsid',
             '8' => 'holding_id',
         },
         'AVD' => {
